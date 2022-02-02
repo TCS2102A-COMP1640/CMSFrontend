@@ -1,5 +1,11 @@
 import React from "react";
-import { Route, Switch } from "react-router";
-import { hot } from "react-hot-loader";
+import { Routes, Route } from "react-router";
+import { LoginPage } from "@app/pages";
 
-export const App = hot(module)(() => <Switch></Switch>);
+export function App(props: {}) {
+	return (
+		<Routes>
+			<Route path="/" element={<LoginPage />} />
+		</Routes>
+	);
+}
