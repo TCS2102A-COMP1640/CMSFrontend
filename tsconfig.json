@@ -1,16 +1,18 @@
 {
 	"compilerOptions": {
 		"moduleResolution": "node",
+		"noImplicitAny": true,
 		"noImplicitReturns": true,
+		"noImplicitThis": true,
 		"noUnusedLocals": true,
 		"esModuleInterop": true,
 		"baseUrl": "src",
 		"module": "es6",
 		"target": "es2021",
+		"lib": ["es6", "dom"],
 		"jsx": "react",
 		"paths": {
-			"@app/*": ["app/*"],
-			"@app": ["app"]
+			"@app/*": ["app/*", "app"]
 		},
 		"strict": true
 	},

@@ -80,7 +80,8 @@ module.exports = {
 				}
 			}
 		},
-		runtimeChunk: true
+		runtimeChunk: true,
+		usedExports: true
 	},
 	plugins: [
 		new webpack.EnvironmentPlugin({

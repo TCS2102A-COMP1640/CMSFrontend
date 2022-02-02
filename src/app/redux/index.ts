@@ -1,11 +1,21 @@
-import { createStore, applyMiddleware, combineReducers } from "redux";
-import { UsersReducer } from "./users/reducers";
+import { configureStore } from "@reduxjs/toolkit";
+import { AuthState, authReducer } from "./auth";
+import { UsersState, usersReducer } from "./users";
 import thunk from "redux-thunk";
 
-const RootReducer = combineReducers({
-	users: UsersReducer
+interface RootState {
+	auth: AuthState;
+	users: UsersState;
+}
+
+const Store = configureStore({
+	reducer: {
+		auth: authReducer,
+		users: usersReducer
+	},
+	middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), thunk]
 });
 
-const store = createStore(RootReducer, {}, applyMiddleware(thunk));
-
-export default store;
+export { Store, RootState };
+export { loginToAccount } from "./auth";
+export { getUserById } from "./users";
