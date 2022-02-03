@@ -8,7 +8,6 @@ interface AuthState {
 
 const loginToAccount = createAsyncThunk("auth/login", async (payload: { email: string; password: string }, thunk) => {
 	const data = await fetchHandler({ path: APIPaths.Login, method: "POST", body: payload });
-	console.log(data);
 	return data;
 });
 
