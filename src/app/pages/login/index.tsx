@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, loginToAccount } from "@app/redux";
-import { Container, Box, Button, TextField, Grid } from "@mui/material";
+import { Box, Button, TextField, Grid, CircularProgress, Typography } from "@mui/material";
+import _ from "lodash";
 
 function LoginPage() {
 	//Testing
@@ -9,8 +10,7 @@ function LoginPage() {
 	const { token } = useSelector((state: RootState) => state.auth);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-
-	console.log(token);
+	const [loading, setLoading] = useState(false);
 
 	return (
 		<Grid
@@ -22,32 +22,70 @@ function LoginPage() {
 			style={{ minHeight: "100vh" }}
 		>
 			<Grid item>
-				<TextField
-					placeholder="Email"
-					onInput={(e) => {
-						setEmail((e.target as HTMLInputElement).value);
-					}}
-				/>
+				<Typography variant="h4">Login</Typography>
 			</Grid>
 			<Grid item>
-				<TextField
-					placeholder="Password"
-					onInput={(e) => {
-						setPassword((e.target as HTMLInputElement).value);
-					}}
-				/>
-			</Grid>
-			<Grid item>
-				<Button
-					type="submit"
-					variant="contained"
-					onClick={() => {
-						console.log(email);
-						console.log(password);
+				<Box
+					sx={{
+						width: 300,
+						border: "1px dashed grey",
+						p: 5
 					}}
 				>
-					Submit
-				</Button>
+					<Grid container spacing={3} direction="column">
+						<Grid item>
+							<TextField
+								fullWidth
+								type="email"
+								label="Email"
+								onChange={(e) => setEmail(e.target.value)}
+								InputProps={{
+									sx: {
+										borderRadius: 0,
+										height: 35
+									}
+								}}
+								InputLabelProps={{
+									sx: {
+										top: !_.isEmpty(email) ? 0 : -9,
+										"&.Mui-focused": {
+											top: 0
+										}
+									}
+								}}
+							/>
+						</Grid>
+						<Grid item>
+							<TextField
+								fullWidth
+								type="password"
+								label="Password"
+								onChange={(e) => setPassword(e.target.value)}
+								InputProps={{
+									sx: {
+										borderRadius: 0,
+										height: 35
+									}
+								}}
+								InputLabelProps={{
+									sx: {
+										top: !_.isEmpty(password) ? 0 : -9,
+										"&.Mui-focused": {
+											top: 0
+										}
+									}
+								}}
+							>
+								Password
+							</TextField>
+						</Grid>
+						<Grid item>
+							<Button fullWidth type="submit" variant="contained" onClick={() => setLoading(true)}>
+								{loading ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Submit"}
+							</Button>
+						</Grid>
+					</Grid>
+				</Box>
 			</Grid>
 		</Grid>
 	);
