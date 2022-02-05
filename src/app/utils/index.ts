@@ -15,6 +15,22 @@ export interface FetchParams {
 	mode?: RequestMode;
 }
 
+export function isTokenExpired(token: string) {
+	if (_.isEmpty(token)) {
+		return true;
+	}
+	try {
+		const jwt = JSON.parse(atob(token.split(".")[1]));
+		if (!_.has(jwt, "exp") || jwt.exp * 1000 < Date.now()) {
+			return true;
+		}
+		return false;
+	} catch (err) {
+		console.error(err);
+		return true;
+	}
+}
+
 export async function fetchHandler(params: FetchParams) {
 	const { path, body, query, token, method, mode } = params;
 	try {
@@ -42,8 +58,16 @@ export async function fetchHandler(params: FetchParams) {
 			}
 		);
 		clearTimeout(timeoutId);
-		return { status: response.status, data: response.status >= 200 && response.status <= 206 ? await response.json() : {} };
-	} catch (error: any) {
-		return { status: 500, data: {}, error };
+		return {
+			status: response.status,
+			data: response.status >= 200 && response.status <= 206 ? await response.json() : {}
+		};
+	} catch (error) {
+		console.error(error);
+		return {
+			status: 500,
+			data: {},
+			error: error instanceof Error ? error : new Error("Something wrong happened. Please try again later.")
+		};
 	}
 }

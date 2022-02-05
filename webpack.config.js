@@ -106,6 +106,7 @@ module.exports = {
 	].filter(Boolean),
 	devServer: {
 		static: path.resolve(__dirname, "src"),
+		historyApiFallback: true,
 		hot: true
 	},
 	devtool: isProduction ? "hidden-source-map" : "cheap-module-source-map"

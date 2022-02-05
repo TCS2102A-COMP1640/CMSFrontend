@@ -1,16 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, loginToAccount } from "@app/redux";
+import { useNavigate } from "react-router-dom";
 import { Box, Button, TextField, Grid, CircularProgress, Typography } from "@mui/material";
+import { RootState, loginToAccount } from "@app/redux";
+import { isTokenExpired } from "@app/utils";
 import _ from "lodash";
 
-function LoginPage() {
+export function LoginPage() {
 	//Testing
 	const dispatch = useDispatch();
-	const { token } = useSelector((state: RootState) => state.auth);
+	const navigate = useNavigate();
+	const { token, status, error } = useSelector((state: RootState) => state.auth);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [loading, setLoading] = useState(false);
+
+	const validate = () => {
+        
+    };
+
+	useEffect(() => {
+		if (!isTokenExpired(token)) {
+			navigate("/");
+		}
+	});
 
 	return (
 		<Grid
@@ -38,6 +50,8 @@ function LoginPage() {
 								fullWidth
 								type="email"
 								label="Email"
+                                error
+                                
 								onChange={(e) => setEmail(e.target.value)}
 								InputProps={{
 									sx: {
@@ -80,8 +94,21 @@ function LoginPage() {
 							</TextField>
 						</Grid>
 						<Grid item>
-							<Button fullWidth type="submit" variant="contained" onClick={() => setLoading(true)}>
-								{loading ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Submit"}
+							<Button
+								fullWidth
+								type="submit"
+								variant="contained"
+								onClick={() => {
+									if (status === "idle") {
+										dispatch(loginToAccount({ email, password }));
+									}
+								}}
+							>
+								{status === "pending" ? (
+									<CircularProgress size={24} sx={{ color: "white" }} />
+								) : (
+									"Submit"
+								)}
 							</Button>
 						</Grid>
 					</Grid>
@@ -90,5 +117,3 @@ function LoginPage() {
 		</Grid>
 	);
 }
-
-export { LoginPage };

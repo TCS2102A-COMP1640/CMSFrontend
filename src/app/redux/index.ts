@@ -20,5 +20,5 @@ const Store = configureStore({
 const StorePersistor = persistStore(Store);
 
 export { Store, StorePersistor, RootState };
-export { loginToAccount } from "./auth";
+export { loginToAccount, logoutFromAccount } from "./auth";
 export { getUserById } from "./users";
