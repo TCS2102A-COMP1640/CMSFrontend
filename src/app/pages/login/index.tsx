@@ -14,9 +14,9 @@ export function LoginPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 
-	const validate = () => {
-        
-    };
+	// const validate = () => {
+
+	// };
 
 	useEffect(() => {
 		if (!isTokenExpired(token)) {
@@ -50,8 +50,7 @@ export function LoginPage() {
 								fullWidth
 								type="email"
 								label="Email"
-                                error
-                                
+								error
 								onChange={(e) => setEmail(e.target.value)}
 								InputProps={{
 									sx: {

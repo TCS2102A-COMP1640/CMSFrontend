@@ -12,7 +12,7 @@ interface RootState {
 
 const Store = configureStore({
 	reducer: {
-		auth: persistReducer<AuthState>({ key: "auth", storage }, authReducer),
+		auth: persistReducer<AuthState>({ key: "auth", storage, blacklist: ["status", "error"] }, authReducer),
 		users: usersReducer
 	},
 	middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), thunk]
