@@ -35,3 +35,4 @@ export function ProfilePage() {
 		</Box>
 	);
 }
+
