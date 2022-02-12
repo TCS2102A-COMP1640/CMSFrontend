@@ -31,7 +31,8 @@ export function IdeaPage() {
 	const handleClose = () => {
 		setAnchorEl(null);
 	};
-	//const [commentVisible, setCommentVisible] = useState(false);
+	const [commentVisible, setCommentVisible] = useState(false);
+	const onClick = () => setCommentVisible(true)
 
 	return (
 		<Box sx={{ flexGrow: 1, overflow: "hidden", px: 3 }}>
@@ -90,7 +91,8 @@ export function IdeaPage() {
 						<Stack direction="row" spacing={2}>
 							<Button variant="contained" startIcon={<ThumbUpIcon />}></Button>
 							<Button variant="contained" startIcon={<ThumbDownIcon />}></Button>
-							<Button variant="contained" startIcon={<CommentIcon />}>
+							<Button variant="contained" startIcon={<CommentIcon />} onClick={onClick}>
+								{commentVisible ? "block" : "none"}
 								Comment
 							</Button>
 						</Stack>
