@@ -32,7 +32,7 @@ export function IdeaPage() {
 		setAnchorEl(null);
 	};
 	const [commentVisible, setCommentVisible] = useState(false);
-	const onClick = () => setCommentVisible(true)
+	const onClick = () => setCommentVisible(!commentVisible)
 
 	return (
 		<Box sx={{ flexGrow: 1, overflow: "hidden", px: 3 }}>
@@ -92,14 +92,13 @@ export function IdeaPage() {
 							<Button variant="contained" startIcon={<ThumbUpIcon />}></Button>
 							<Button variant="contained" startIcon={<ThumbDownIcon />}></Button>
 							<Button variant="contained" startIcon={<CommentIcon />} onClick={onClick}>
-								{commentVisible ? "block" : "none"}
 								Comment
 							</Button>
 						</Stack>
 					</Grid>
 				</Grid>			
 
-				<Box sx={{ flexGrow: 1, overflow: "hidden", px: 3, maxHeight: 90, marginLeft: -20}}>
+				<Box sx={{ flexGrow: 1, overflow: "hidden", px: 3, maxHeight: 90, marginLeft: -20, display: commentVisible ? "block" : "none"}}>
 					<Paper sx={{ maxWidth: 800, my: 1, mx: "auto", p: 2, border: "1px solid" }}>
 						<Grid container wrap="nowrap" spacing={2}>
 							<Grid item>
@@ -110,7 +109,7 @@ export function IdeaPage() {
 					</Paper>
 				</Box>
 					
-				<Box sx={{ flexGrow: 1, overflow: "hidden", px: 3, marginLeft: -20}}>
+				<Box sx={{ flexGrow: 1, overflow: "hidden", px: 3, marginLeft: -20, display: commentVisible ? "block" : "none"}}>
 					<Paper sx={{ maxWidth: 800, my: 1, mx: "auto", p: 2, border: "1px solid" }}>
 						<Grid container wrap="nowrap" spacing={2}>
 							<Grid item>
@@ -127,7 +126,7 @@ export function IdeaPage() {
 					</Paper>
 				</Box>
 
-				<Box sx={{ flexGrow: 1, overflow: "hidden", px: 3, marginLeft: -20}}>
+				<Box sx={{ flexGrow: 1, overflow: "hidden", px: 3, marginLeft: -20, display: commentVisible ? "block" : "none"}}>
 					<Paper sx={{ maxWidth: 800, my: 1, mx: "auto", p: 2, border: "1px solid" }}>
 						<Grid container wrap="nowrap" spacing={2}>
 							<Grid item>
@@ -144,7 +143,7 @@ export function IdeaPage() {
 					</Paper>
 				</Box>
 
-				<Box sx={{ flexGrow: 1, overflow: "hidden", px: 3, marginLeft: -20}}>
+				<Box sx={{ flexGrow: 1, overflow: "hidden", px: 3, marginLeft: -20, display: commentVisible ? "block" : "none"}}>
 					<Paper sx={{ maxWidth: 800, my: 1, mx: "auto", p: 2, border: "1px solid" }}>
 						<Grid container wrap="nowrap" spacing={2}>
 							<Grid item>
