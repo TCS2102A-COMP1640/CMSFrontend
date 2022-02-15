@@ -3,7 +3,8 @@ import _ from "lodash";
 export const APITimeout = 10000;
 export const APIBase = "http://localhost:5000";
 export const APIPaths = {
-	Login: `${APIBase}/auth`
+	Login: `${APIBase}/auth`,
+	IdeaGetAll: `${APIBase}/ideas`
 };
 
 export interface FetchParams {
