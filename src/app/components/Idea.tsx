@@ -10,7 +10,6 @@ import {
 	AccordionDetails,
 	Theme,
 	TextField,
-	Box,
 	useMediaQuery
 } from "@mui/material";
 import { ThumbUp, ThumbDown, Comment, ExpandMore } from "@mui/icons-material";

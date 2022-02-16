@@ -15,11 +15,20 @@ import {
 	Theme,
 	useMediaQuery
 } from "@mui/material";
-import { AccountBoxOutlined, ArticleOutlined, MenuOutlined, LogoutRounded } from "@mui/icons-material";
+import {
+	AccountBoxOutlined,
+	ArticleOutlined,
+	MenuOutlined,
+	LogoutRounded,
+	TagOutlined,
+	CalendarTodayOutlined,
+	CorporateFareOutlined,
+	PersonOutlined
+} from "@mui/icons-material";
 import { logoutFromAccount } from "@app/redux";
 import _ from "lodash";
 
-const drawerWidth = 180;
+const drawerWidth = 200;
 const menuItems = [
 	{
 		name: "Profile",
@@ -28,6 +37,22 @@ const menuItems = [
 	{
 		name: "Idea",
 		icon: <ArticleOutlined />
+	},
+	{
+		name: "Category",
+		icon: <TagOutlined />
+	},
+	{
+		name: "Year",
+		icon: <CalendarTodayOutlined />
+	},
+	{
+		name: "Department",
+		icon: <CorporateFareOutlined />
+	},
+	{
+		name: "User",
+		icon: <PersonOutlined />
 	}
 ];
 
@@ -48,6 +73,7 @@ export function HomePage() {
 		if (mediaQueries.sm) {
 			setOpenDrawer(false);
 		}
+		navigate("/profile");
 	}, []);
 
 	return (
