@@ -12,7 +12,6 @@ interface Captions {
 }
 
 export function LoginPage() {
-    
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const { token, status } = useSelector((state: RootState) => state.auth);

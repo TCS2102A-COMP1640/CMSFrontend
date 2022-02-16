@@ -16,22 +16,29 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export function ProfilePage() {
 	return (
-		<Box sx={{ flexGrow: 1, overflow: "hidden", px: 3 }}>
-			<Paper sx={{ maxWidth: 500, my: 1, mx: "auto", p: 2 }}>
-				<Grid container wrap="nowrap" spacing={2}>
-					<Grid item>
-						<Button>
-							<Avatar style={{ height: 100, width: 100 }}>J</Avatar>
-						</Button>
+		<Grid container direction="column" px={15} spacing={2}>
+			`{" "}
+			<Grid item alignSelf="center">
+				<Typography variant="h5">Profile</Typography>
+			</Grid>
+			<Box sx={{ flexGrow: 1, overflow: "hidden", px: 3 }}>
+				<Paper sx={{ maxWidth: 500, my: 1, mx: "auto", p: 2 }}>
+					<Grid container wrap="nowrap" spacing={2}>
+						<Grid item>
+							<Button>
+								<Avatar style={{ height: 100, width: 100 }}>J</Avatar>
+							</Button>
+						</Grid>
+						<Grid item xs>
+							<Typography style={{ fontSize: 30 }}>Name:Jonh Holland</Typography>
+							<Typography>Phone: +84 021255458</Typography>
+							<Typography>Role: QA Manager</Typography>
+							<Typography>Description: Like Dog, Play game, etc. </Typography>
+						</Grid>
 					</Grid>
-					<Grid item xs>
-						<Typography style={{ fontSize: 30 }}>Name:Jonh Holland</Typography>
-						<Typography>Phone: +84 021255458</Typography>
-						<Typography>Role: QA Manager</Typography>
-						<Typography>Description: Like Dog, Play game, etc. </Typography>
-					</Grid>
-				</Grid>
-			</Paper>
-		</Box>
+				</Paper>
+			</Box>
+			`
+		</Grid>
 	);
 }
