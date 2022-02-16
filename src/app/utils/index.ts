@@ -7,6 +7,8 @@ export const APIPaths = {
 	IdeaGetAll: `${APIBase}/ideas`
 };
 
+export type Status = "idle" | "pending";
+
 export interface FetchParams {
 	path: string;
 	body?: { [index: string]: any } | FormData;
@@ -14,6 +16,10 @@ export interface FetchParams {
 	token?: string;
 	method: "GET" | "PUT" | "POST" | "PATCH" | "DELETE";
 	mode?: RequestMode;
+}
+
+export function isEmail(email: string) {
+	return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(email);
 }
 
 export function isTokenExpired(token: string) {

@@ -12,8 +12,8 @@ import {
 	ListItemIcon,
 	Typography,
 	IconButton,
-	useMediaQuery,
-	Theme
+	Theme,
+	useMediaQuery
 } from "@mui/material";
 import { AccountBoxOutlined, ArticleOutlined, MenuOutlined, LogoutRounded } from "@mui/icons-material";
 import { logoutFromAccount } from "@app/redux";
@@ -48,7 +48,7 @@ export function HomePage() {
 		if (mediaQueries.sm) {
 			setOpenDrawer(false);
 		}
-	});
+	}, []);
 
 	return (
 		<Box display="flex">
@@ -56,7 +56,7 @@ export function HomePage() {
 				sx={{
 					width: { sm: `calc(100% - ${drawerWidth}px)` },
 					ml: { sm: `${drawerWidth}px` },
-					backgroundColor: "transparent"
+					backgroundColor: "white"
 				}}
 			>
 				<Toolbar>
@@ -67,10 +67,7 @@ export function HomePage() {
 						variant="h6"
 						sx={{
 							flexGrow: 1,
-							display: {
-								xs: "none",
-								sm: "block"
-							},
+							display: "block",
 							color: "black"
 						}}
 					>

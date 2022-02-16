@@ -3,26 +3,44 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, TextField, Grid, CircularProgress, Typography } from "@mui/material";
 import { RootState, loginToAccount } from "@app/redux";
-import { isTokenExpired } from "@app/utils";
+import { isTokenExpired, isEmail } from "@app/utils";
 import _ from "lodash";
 
+interface Captions {
+	email?: string;
+	password?: string;
+}
+
 export function LoginPage() {
-	//Testing
+    
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const { token, status, error } = useSelector((state: RootState) => state.auth);
+	const { token, status } = useSelector((state: RootState) => state.auth);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [captions, setCaptions] = useState<Captions>({});
 
-	// const validate = () => {
+	const validate = () => {
+		const captions: Captions = {};
 
-	// };
+		if (_.isEmpty(email) || !isEmail(email)) {
+			captions.email = "Please enter a valid email";
+		}
+
+		if (_.isEmpty(password)) {
+			captions.password = "Please enter a valid password";
+		}
+
+		setCaptions(captions);
+
+		return _.isEmpty(captions) ? true : false;
+	};
 
 	useEffect(() => {
 		if (!isTokenExpired(token)) {
 			navigate("/");
 		}
-	});
+	}, []);
 
 	return (
 		<Grid
@@ -50,7 +68,8 @@ export function LoginPage() {
 								fullWidth
 								type="email"
 								label="Email"
-								error
+								error={captions.email ? true : false}
+								helperText={captions.email}
 								onChange={(e) => setEmail(e.target.value)}
 								InputProps={{
 									sx: {
@@ -73,6 +92,8 @@ export function LoginPage() {
 								fullWidth
 								type="password"
 								label="Password"
+								error={captions.password ? true : false}
+								helperText={captions.password}
 								onChange={(e) => setPassword(e.target.value)}
 								InputProps={{
 									sx: {
@@ -98,8 +119,10 @@ export function LoginPage() {
 								type="submit"
 								variant="contained"
 								onClick={() => {
-									if (status === "idle") {
-										dispatch(loginToAccount({ email, password }));
+									if (validate()) {
+										if (status === "idle") {
+											dispatch(loginToAccount({ email, password }));
+										}
 									}
 								}}
 							>
