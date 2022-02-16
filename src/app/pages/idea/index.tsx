@@ -54,7 +54,7 @@ export function IdeaPage() {
 				<Card sx={{ maxWidth: 345 }}>
 					<CardHeader
 						action={
-							<IconButton aria-label="settings">
+							<IconButton aria-label="settings" onClick ={onClick}>
 								<CancelIcon />
 							</IconButton>
 						}
