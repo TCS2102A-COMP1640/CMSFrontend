@@ -1,12 +1,14 @@
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
-import { LoginPayload } from "./interfaces";
+import { LoginPayload, AuthProfile } from "./interfaces";
 import _ from "lodash";
 
-export const loginToAccount = createAsyncThunk<string, LoginPayload, { rejectValue: Error }>(
+export const resetAuthState = createAction("auth/reset");
+
+export const loginToAccount = createAsyncThunk<string, LoginPayload>(
 	"auth/login",
 	async (payload, { rejectWithValue }) => {
-		const { data, error } = await fetchHandler({ path: APIPaths.Login, method: "POST", body: payload });
+		const { data, error } = await fetchHandler({ path: APIPaths.Auth, method: "POST", body: payload });
 		if (_.isNil(error)) {
 			return data.token as string;
 		}
@@ -14,3 +16,15 @@ export const loginToAccount = createAsyncThunk<string, LoginPayload, { rejectVal
 	}
 );
 export const logoutFromAccount = createAction("auth/logout");
+
+export const getProfile = createAsyncThunk<AuthProfile, void>(
+	"auth/profile",
+	async (ignored, { rejectWithValue, getState }) => {
+		const { auth } = getState();
+		const { data, error } = await fetchHandler({ path: APIPaths.Auth, method: "GET", token: auth.token });
+		if (_.isNil(error)) {
+			return data as AuthProfile;
+		}
+		return rejectWithValue(error);
+	}
+);

@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { AuthState } from "./interfaces";
 import { loginToAccount, logoutFromAccount } from "./actions";
+import { getProfile, resetAuthState } from ".";
 
 const authState: AuthState = {
 	token: "",
@@ -26,6 +27,12 @@ const authSlice = createSlice({
 			})
 			.addCase(logoutFromAccount, (state, action) => {
 				state.token = "";
+			})
+			.addCase(getProfile.fulfilled, (state, action) => {
+				state.profile = action.payload;
+			})
+			.addCase(resetAuthState, (state, action) => {
+				return authState;
 			});
 	}
 });

@@ -3,7 +3,7 @@ import { APIPaths, fetchHandler } from "@app/utils";
 import { CommentData, GetCommentsPayload } from "./interfaces";
 import _ from "lodash";
 
-export const getComments = createAsyncThunk<CommentData[], GetCommentsPayload, { rejectValue: Error }>(
+export const getComments = createAsyncThunk<CommentData[], GetCommentsPayload>(
 	"comments/getComments",
 	async (payload, { rejectWithValue, requestId }) => {
 		// const { data, error } = await fetchHandler({ path: APIPaths.Login, method: "GET", query: payload });

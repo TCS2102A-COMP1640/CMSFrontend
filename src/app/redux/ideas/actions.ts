@@ -3,7 +3,7 @@ import { APIPaths, fetchHandler } from "@app/utils";
 import { IdeaData, GetIdeasPayload } from "./interfaces";
 import _ from "lodash";
 
-export const getIdeas = createAsyncThunk<IdeaData[], GetIdeasPayload, { rejectValue: Error }>(
+export const getIdeas = createAsyncThunk<IdeaData[], GetIdeasPayload>(
 	"ideas/getIdeas",
 	async (payload, { rejectWithValue }) => {
 		// const { data, error } = await fetchHandler({ path: APIPaths.Login, method: "GET", query: payload });

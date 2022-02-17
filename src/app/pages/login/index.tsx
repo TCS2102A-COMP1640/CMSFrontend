@@ -37,6 +37,7 @@ export function LoginPage() {
 
 	useEffect(() => {
 		if (!isTokenExpired(token)) {
+            console.log(token);
 			navigate("/");
 		}
 	});

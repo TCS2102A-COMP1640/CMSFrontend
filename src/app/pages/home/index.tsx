@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
 	Toolbar,
 	Box,
@@ -25,7 +25,8 @@ import {
 	CorporateFareOutlined,
 	PersonOutlined
 } from "@mui/icons-material";
-import { logoutFromAccount } from "@app/redux";
+import { logoutFromAccount, RootState, resetAuthState } from "@app/redux";
+import { isTokenExpired } from "@app/utils";
 import _ from "lodash";
 
 const drawerWidth = 200;
@@ -57,8 +58,10 @@ const menuItems = [
 ];
 
 export function HomePage() {
+	const location = useLocation();
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
+	const { token } = useSelector((state: RootState) => state.auth);
 	const [openDrawer, setOpenDrawer] = useState(false);
 	const [selectedItem, setSelectedItem] = useState(menuItems[0].name);
 	const mediaQueries = {
@@ -73,8 +76,15 @@ export function HomePage() {
 		if (mediaQueries.sm) {
 			setOpenDrawer(false);
 		}
-		navigate("/idea");
+		navigate("/profile");
 	}, []);
+
+	useEffect(() => {
+		if (isTokenExpired(token)) {
+			dispatch(resetAuthState());
+			navigate("/login");
+		}
+	}, [location]);
 
 	return (
 		<Box display="flex">

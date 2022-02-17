@@ -3,7 +3,7 @@ import _ from "lodash";
 export const APITimeout = 10000;
 export const APIBase = "http://localhost:5000";
 export const APIPaths = {
-	Login: `${APIBase}/auth`,
+	Auth: `${APIBase}/auth`,
 	IdeaGetAll: `${APIBase}/ideas`
 };
 
@@ -54,16 +54,13 @@ export async function fetchHandler(params: FetchParams) {
 			headers.set("Authorization", `Bearer ${token}`);
 		}
 		const timeoutId = setTimeout(() => abort.abort(), APITimeout);
-		const response = await fetch(
-			`${path}${typeof query !== "undefined" ? "?" + new URLSearchParams(query).toString() : ""}`,
-			{
-				method,
-				signal,
-				headers,
-				mode: mode || "cors",
-				body: JSON.stringify(body)
-			}
-		);
+		const response = await fetch(`${path}${!_.isNil(query) ? "?" + new URLSearchParams(query).toString() : ""}`, {
+			method,
+			signal,
+			headers,
+			mode: mode || "cors",
+			body: JSON.stringify(body)
+		});
 		clearTimeout(timeoutId);
 		return {
 			status: response.status,
