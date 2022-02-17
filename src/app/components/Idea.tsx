@@ -50,7 +50,9 @@ export function Idea(props: IdeaProps) {
 	return (
 		<Accordion>
 			<AccordionSummary expandIcon={<ExpandMore />}>
-				<Typography variant={mediaQueries.sm ? "h5" : "h6"}>{department}</Typography>
+				<Typography fontSize={18} variant={mediaQueries.sm ? "h5" : "h6"}>
+					{department}
+				</Typography>
 			</AccordionSummary>
 			<AccordionDetails>
 				<Grid container direction="column">
@@ -97,19 +99,13 @@ export function Idea(props: IdeaProps) {
 							<Grid item xs>
 								<TextField
 									onChange={(e) => setInputComment(e.target.value)}
-									label="Write a comment"
+									multiline
+									fullWidth
+									rows={1}
+									placeholder="Write a comment"
 									InputProps={{
 										sx: {
-											borderRadius: 0,
-											height: 35
-										}
-									}}
-									InputLabelProps={{
-										sx: {
-											top: !_.isEmpty(inputComment) ? 0 : -9,
-											"&.Mui-focused": {
-												top: 0
-											}
+											height: 30
 										}
 									}}
 								/>

@@ -17,7 +17,6 @@ const Item = styled(Paper)(({ theme }) => ({
 export function ProfilePage() {
 	return (
 		<Grid container direction="column" px={15} spacing={2}>
-			`{" "}
 			<Grid item alignSelf="center">
 				<Typography variant="h5">Profile</Typography>
 			</Grid>
@@ -38,7 +37,6 @@ export function ProfilePage() {
 					</Grid>
 				</Paper>
 			</Box>
-			`
 		</Grid>
 	);
 }

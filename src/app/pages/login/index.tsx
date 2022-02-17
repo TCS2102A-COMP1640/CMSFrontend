@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, TextField, Grid, CircularProgress, Typography } from "@mui/material";
 import { RootState, loginToAccount } from "@app/redux";
@@ -39,7 +39,7 @@ export function LoginPage() {
 		if (!isTokenExpired(token)) {
 			navigate("/");
 		}
-	}, []);
+	});
 
 	return (
 		<Grid

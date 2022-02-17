@@ -73,7 +73,7 @@ export function HomePage() {
 		if (mediaQueries.sm) {
 			setOpenDrawer(false);
 		}
-		navigate("/profile");
+		navigate("/idea");
 	}, []);
 
 	return (
