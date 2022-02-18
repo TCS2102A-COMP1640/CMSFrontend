@@ -3,18 +3,21 @@ import { configureStore, AsyncThunkPayloadCreator, AsyncThunk, AsyncThunkOptions
 import { persistStore, persistReducer } from "redux-persist";
 import { AuthState, authReducer } from "./auth";
 import { IdeasState, ideasReducer } from "./ideas";
+import { YearsState, yearsReducer } from "./years";
 import storage from "redux-persist/lib/storage";
 import thunk from "redux-thunk";
 
 interface RootState {
 	auth: AuthState;
 	ideas: IdeasState;
+	years: YearsState;
 }
 
 const Store = configureStore({
 	reducer: {
 		auth: persistReducer<AuthState>({ key: "auth", storage, blacklist: ["status", "error"] }, authReducer),
-		ideas: ideasReducer
+		ideas: ideasReducer,
+		years: yearsReducer
 	},
 	middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(thunk).concat()
 });
@@ -27,10 +30,12 @@ export { Store, StorePersistor, RootState, AppDispatch, useAppDispatch };
 export { loginToAccount, logoutFromAccount, getProfile, resetAuthState } from "./auth";
 export { getIdeas } from "./ideas";
 export { getComments } from "./comments";
+export { getYears, createYear, editYear, deleteYear } from "./years";
 
 export type { AuthState, LoginPayload } from "./auth";
 export type { CommentData, GetCommentsPayload } from "./comments";
 export type { IdeasState, IdeaData, GetIdeasPayload } from "./ideas";
+export type { YearsState, YearData } from "./years";
 
 // Reference: https://stackoverflow.com/questions/64793504/cannot-set-getstate-type-to-rootstate-in-createasyncthunk
 declare module "@reduxjs/toolkit" {

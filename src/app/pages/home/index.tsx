@@ -29,7 +29,7 @@ import { logoutFromAccount, RootState, resetAuthState } from "@app/redux";
 import { isTokenExpired } from "@app/utils";
 import _ from "lodash";
 
-const drawerWidth = 200;
+const drawerWidth = 190;
 const menuItems = [
 	{
 		name: "Profile",
@@ -76,7 +76,7 @@ export function HomePage() {
 		if (mediaQueries.sm) {
 			setOpenDrawer(false);
 		}
-		navigate("/profile");
+		navigate("/year");
 	}, []);
 
 	useEffect(() => {

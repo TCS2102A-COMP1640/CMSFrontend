@@ -4,6 +4,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 const isProduction = process.argv.indexOf("production") >= 0 || process.env.NODE_ENV === "production";
 
@@ -36,7 +37,7 @@ module.exports = {
 					{
 						loader: "babel-loader",
 						options: {
-							plugins: [!isProduction && "react-refresh/babel"].filter(Boolean),
+							plugins: [!isProduction && "react-refresh/babel", "lodash"].filter(Boolean),
 							presets: [
 								["@babel/preset-env", { useBuiltIns: "usage", corejs: "3.21" }],
 								"@babel/preset-typescript",
@@ -85,7 +86,7 @@ module.exports = {
 	},
 	plugins: [
 		new webpack.EnvironmentPlugin({
-			NODE_ENV: "development", // use 'development' unless process.env.NODE_ENV is defined
+			"process.env.NODE_ENV": JSON.stringify("development"), // use 'development' unless process.env.NODE_ENV is defined
 			DEBUG: false
 		}),
 		new MiniCssExtractPlugin({
@@ -102,6 +103,7 @@ module.exports = {
 				collapseInlineTagWhitespace: true
 			}
 		}),
+		isProduction && new BundleAnalyzerPlugin({ analyzerMode: "static" }),
 		!isProduction && new ReactRefreshWebpackPlugin()
 	].filter(Boolean),
 	devServer: {

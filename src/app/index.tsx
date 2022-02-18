@@ -4,6 +4,8 @@ import { Routes, Route } from "react-router";
 import { BrowserRouter } from "react-router-dom";
 import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider, createTheme } from "@mui/material";
+import { LocalizationProvider } from "@mui/lab";
+import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import {
 	LoginPage,
 	HomePage,
@@ -24,23 +26,25 @@ export function App() {
 	return (
 		<ThemeProvider theme={Theme}>
 			<Provider store={Store}>
-				<PersistGate persistor={StorePersistor}>
-					<BrowserRouter>
-						<Routes>
-							<Route path="/login" element={<LoginPage />} />
-							<Route path="/" element={<AuthRequired />}>
-								<Route path="/" element={<HomePage />}>
-									<Route path="/profile" element={<ProfilePage />} />
-									<Route path="/idea" element={<IdeaPage />} />
-									<Route path="/category" element={<CategoryPage />} />
-									<Route path="/year" element={<YearPage />} />
-									<Route path="/department" element={<DepartmentPage />} />
-									<Route path="/user" element={<UserPage />} />
+				<LocalizationProvider dateAdapter={AdapterDateFns}>
+					<PersistGate persistor={StorePersistor}>
+						<BrowserRouter>
+							<Routes>
+								<Route path="/login" element={<LoginPage />} />
+								<Route path="/" element={<AuthRequired />}>
+									<Route path="/" element={<HomePage />}>
+										<Route path="/profile" element={<ProfilePage />} />
+										<Route path="/idea" element={<IdeaPage />} />
+										<Route path="/category" element={<CategoryPage />} />
+										<Route path="/year" element={<YearPage />} />
+										<Route path="/department" element={<DepartmentPage />} />
+										<Route path="/user" element={<UserPage />} />
+									</Route>
 								</Route>
-							</Route>
-						</Routes>
-					</BrowserRouter>
-				</PersistGate>
+							</Routes>
+						</BrowserRouter>
+					</PersistGate>
+				</LocalizationProvider>
 			</Provider>
 		</ThemeProvider>
 	);

@@ -4,13 +4,15 @@ export const APITimeout = 10000;
 export const APIBase = "http://localhost:5000";
 export const APIPaths = {
 	Auth: `${APIBase}/auth`,
-	IdeaGetAll: `${APIBase}/ideas`
+	Ideas: `${APIBase}/ideas`,
+	Years: `${APIBase}/years`
 };
 
 export type Status = "idle" | "pending";
 
 export interface FetchParams {
 	path: string;
+	params?: { [index: string]: any };
 	body?: { [index: string]: any } | FormData;
 	query?: { [index: string]: any };
 	token?: string;
@@ -38,8 +40,8 @@ export function isTokenExpired(token: string) {
 	}
 }
 
-export async function fetchHandler(params: FetchParams) {
-	const { path, body, query, token, method, mode } = params;
+export async function fetchHandler(p: FetchParams) {
+	const { path, params, body, query, token, method, mode } = p;
 	try {
 		const abort = new AbortController();
 		const signal = abort.signal;
@@ -54,7 +56,14 @@ export async function fetchHandler(params: FetchParams) {
 			headers.set("Authorization", `Bearer ${token}`);
 		}
 		const timeoutId = setTimeout(() => abort.abort(), APITimeout);
-		const response = await fetch(`${path}${!_.isNil(query) ? "?" + new URLSearchParams(query).toString() : ""}`, {
+
+		let requestPath = path;
+		for (const param in params) {
+			requestPath = requestPath.replace(`:${param}`, params[param].toString());
+		}
+		const requestQuery = !_.isNil(query) ? "?" + new URLSearchParams(query).toString() : "";
+
+		const response = await fetch(`${requestPath}${requestQuery}`, {
 			method,
 			signal,
 			headers,

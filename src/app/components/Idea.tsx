@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, memo } from "react";
 import {
 	Typography,
 	CircularProgress,
@@ -27,7 +27,7 @@ export interface IdeaProps {
 	onLoadComments?: (callback: (status: Status, data: CommentData[]) => void) => void;
 }
 
-export function Idea(props: IdeaProps) {
+function IdeaInternal(props: IdeaProps) {
 	const { department, content, defaultReaction } = props;
 	const [reaction, setReaction] = useState(defaultReaction);
 	const [comments, setComments] = useState<CommentData[]>([]);
@@ -129,6 +129,8 @@ export function Idea(props: IdeaProps) {
 		</Accordion>
 	);
 }
+
+export const Idea = memo(IdeaInternal);
 
 /*
 
