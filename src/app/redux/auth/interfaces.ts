@@ -1,6 +1,7 @@
 import { Status } from "@app/utils";
 
 export interface AuthProfile {
+	id: number;
 	email: string;
 	firstName: string;
 	lastName: string;

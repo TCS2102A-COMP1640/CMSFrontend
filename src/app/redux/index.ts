@@ -28,7 +28,7 @@ const useAppDispatch = () => useDispatch<AppDispatch>();
 
 export { Store, StorePersistor, RootState, AppDispatch, useAppDispatch };
 export { loginToAccount, logoutFromAccount, getProfile, resetAuthState } from "./auth";
-export { getIdeas } from "./ideas";
+export { getIdeas, createIdea } from "./ideas";
 export { getComments } from "./comments";
 export { getYears, createYear, editYear, deleteYear } from "./years";
 

@@ -71,6 +71,11 @@ export async function fetchHandler(p: FetchParams) {
 			body: JSON.stringify(body)
 		});
 		clearTimeout(timeoutId);
+		if (response.status >= 400) {
+			throw {
+				statusCode: response.status
+			};
+		}
 		return {
 			status: response.status,
 			data: response.status >= 200 && response.status <= 206 ? await response.json() : {}
@@ -78,7 +83,7 @@ export async function fetchHandler(p: FetchParams) {
 	} catch (error) {
 		console.error(error);
 		return {
-			status: 500,
+			status: _.get(error, "statusCode", 500),
 			data: {},
 			error: error instanceof Error ? error : new Error("Something wrong happened. Please try again later.")
 		};

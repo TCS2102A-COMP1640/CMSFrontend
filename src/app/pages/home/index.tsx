@@ -76,7 +76,7 @@ export function HomePage() {
 		if (mediaQueries.sm) {
 			setOpenDrawer(false);
 		}
-		navigate("/year");
+		navigate("/idea");
 	}, []);
 
 	useEffect(() => {

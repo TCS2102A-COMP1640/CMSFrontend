@@ -1,53 +1,38 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
-import { IdeaData, GetIdeasPayload } from "./interfaces";
+import { IdeaResponseData, IdeaData, GetIdeasPayload } from "./interfaces";
 import _ from "lodash";
 
-export const getIdeas = createAsyncThunk<IdeaData[], GetIdeasPayload>(
+export const getIdeas = createAsyncThunk<IdeaResponseData, GetIdeasPayload>(
 	"ideas/getIdeas",
-	async (payload, { rejectWithValue }) => {
-		// const { data, error } = await fetchHandler({ path: APIPaths.Login, method: "GET", query: payload });
-		// if (_.isNil(error)) {
-		// 	return data.token as object[];
-		// }
-		// return rejectWithValue(error);
+	async (payload, { rejectWithValue, getState }) => {
+		const { auth } = getState();
+		const { data, error } = await fetchHandler({
+			path: APIPaths.Ideas,
+			method: "GET",
+			query: payload,
+			token: auth.token
+		});
+		if (_.isNil(error)) {
+			return data as IdeaResponseData;
+		}
+		return rejectWithValue(error);
+	}
+);
 
-		// fake data for testing
-		const ideaData: IdeaData = {
-			user: {
-				department: {
-					name: "IT Department"
-				}
-			},
-			// comments: [
-			// 	{
-			// 		content:
-			// 			"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex, sit amet blandit leo lobortis eget."
-			// 	},
-			// 	{
-			// 		content:
-			// 			"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex, sit amet blandit leo lobortis eget."
-			// 	}
-			// ],
-			content:
-				"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex, sit amet blandit leo lobortis eget."
-		};
-		const data = [
-			ideaData,
-			ideaData,
-			ideaData,
-			ideaData,
-			ideaData,
-			ideaData,
-			ideaData,
-			ideaData,
-			ideaData,
-			ideaData,
-			ideaData
-		];
-		const start = Math.min(Math.max((payload.page - 1) * payload.limit, 0), data.length - 1);
-		const end = Math.min(Math.max(payload.page * payload.limit, 0), data.length);
-		await new Promise((r) => setTimeout(r, 500));
-		return data.slice(start, end);
+export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
+	"ideas/createIdea",
+	async (payload, { rejectWithValue, getState }) => {
+		const { auth } = getState();
+		const { data, error } = await fetchHandler({
+			path: APIPaths.Ideas,
+			method: "POST",
+			body: payload,
+			token: auth.token
+		});
+		if (_.isNil(error)) {
+			return data as IdeaData;
+		}
+		return rejectWithValue(error);
 	}
 );

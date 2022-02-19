@@ -37,7 +37,7 @@ export function LoginPage() {
 
 	useEffect(() => {
 		if (!isTokenExpired(token)) {
-            console.log(token);
+			console.log(token);
 			navigate("/");
 		}
 	});
@@ -68,7 +68,7 @@ export function LoginPage() {
 								fullWidth
 								type="email"
 								label="Email"
-								error={captions.email ? true : false}
+								error={!_.isUndefined(captions.email) ? true : false}
 								helperText={captions.email}
 								onChange={(e) => setEmail(e.target.value)}
 								InputProps={{
@@ -92,7 +92,7 @@ export function LoginPage() {
 								fullWidth
 								type="password"
 								label="Password"
-								error={captions.password ? true : false}
+								error={!_.isUndefined(captions.password) ? true : false}
 								helperText={captions.password}
 								onChange={(e) => setPassword(e.target.value)}
 								InputProps={{

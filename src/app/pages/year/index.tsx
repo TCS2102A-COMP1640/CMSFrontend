@@ -28,6 +28,9 @@ import _ from "lodash";
 
 const tableCells = [
 	{
+		label: "ID"
+	},
+	{
 		label: "Name"
 	},
 	{
@@ -59,7 +62,7 @@ export function YearPage() {
 	const [openModal, setOpenModal] = useState(false);
 	const [formModal, setFormModal] = useState<Partial<YearData>>({});
 	const [openingDateError, setOpeningDateError] = useState(false);
-	const [captions, setCaptions] = useState<Captions>();
+	const [captionsModal, setCaptionsModal] = useState<Captions>();
 
 	useEffect(() => {
 		dispatch(getYears());
@@ -84,13 +87,9 @@ export function YearPage() {
 			captions.finalClosureDate = "Please enter a valid date";
 		}
 
-		setCaptions(captions);
+		setCaptionsModal(captions);
 
-		if (!_.isEmpty(captions)) {
-			return false;
-		}
-
-		return true;
+		return _.isEmpty(captions) ? true : false;
 	};
 
 	const performOpenModal = (mode: "create" | "edit" | "delete", row: Partial<YearData>) => {
@@ -101,6 +100,7 @@ export function YearPage() {
 	const performCloseModal = () => {
 		setFormModal({});
 		setOpenModal(false);
+        setCaptionsModal({});
 	};
 
 	return (
@@ -127,8 +127,8 @@ export function YearPage() {
 										fullWidth
 										value={formModal.name}
 										onChange={(e) => setFormModal({ ...formModal, name: e.target.value })}
-										error={captions?.name ? true : false}
-										helperText={captions?.name}
+										error={!_.isUndefined(captionsModal?.name) ? true : false}
+										helperText={captionsModal?.name}
 										label="Name"
 									/>
 								</Grid>
@@ -147,8 +147,8 @@ export function YearPage() {
 											<TextField
 												fullWidth
 												{...params}
-												helperText={captions?.openingDate}
-												error={captions?.openingDate ? true : params.error}
+												helperText={captionsModal?.openingDate}
+												error={!_.isUndefined(captionsModal?.openingDate) ? true : params.error}
 											/>
 										)}
 									/>
@@ -178,8 +178,8 @@ export function YearPage() {
 											<TextField
 												fullWidth
 												{...params}
-												helperText={captions?.closureDate}
-												error={captions?.closureDate ? true : params.error}
+												helperText={captionsModal?.closureDate}
+												error={!_.isUndefined(captionsModal?.closureDate) ? true : params.error}
 											/>
 										)}
 									/>
@@ -212,8 +212,12 @@ export function YearPage() {
 											<TextField
 												fullWidth
 												{...params}
-												helperText={captions?.finalClosureDate}
-												error={captions?.finalClosureDate ? true : params.error}
+												helperText={captionsModal?.finalClosureDate}
+												error={
+													!_.isUndefined(captionsModal?.finalClosureDate)
+														? true
+														: params.error
+												}
 											/>
 										)}
 									/>
@@ -231,8 +235,9 @@ export function YearPage() {
 											dispatch(createYear(formModal as Omit<YearData, "id">)).then(() =>
 												dispatch(getYears())
 											);
+											performCloseModal();
 										}
-										break;
+										return;
 									case "edit":
 										dispatch(editYear(formModal)).then(() => dispatch(getYears()));
 										break;
@@ -301,6 +306,7 @@ export function YearPage() {
 										key={row.id}
 										sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 									>
+										<TableCell align="center">{row.id}</TableCell>
 										<TableCell align="center">{row.name}</TableCell>
 										<TableCell align="center">{format(row.openingDate, "dd/MM/yyyy")}</TableCell>
 										<TableCell align="center">{format(row.closureDate, "dd/MM/yyyy")}</TableCell>
