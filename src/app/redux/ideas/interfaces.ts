@@ -11,7 +11,7 @@ export interface IdeaData {
 	content: string;
 	user: {
 		id: number;
-		department: {
+		department?: {
 			name: string;
 		};
 	};

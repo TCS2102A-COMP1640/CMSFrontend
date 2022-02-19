@@ -202,7 +202,7 @@ export function IdeaPage() {
 					return (
 						<Grid item>
 							<Idea
-								department={idea.user.department.name}
+								department={idea.user.department?.name || "Unknown"}
 								content={idea.content}
 								defaultReaction="none"
 								onReactionChange={(reaction) => {
