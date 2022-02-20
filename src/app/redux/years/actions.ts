@@ -7,9 +7,11 @@ import _ from "lodash";
 export const getYears = createAsyncThunk<YearData[]>(
 	"years/getYears",
 	async (payload, { rejectWithValue, getState }) => {
-		const { auth } = getState();
+		const {
+			auth: { token }
+		} = getState();
 		const { data, error } = <{ data: YearResponseData[]; error?: Error }>(
-			await fetchHandler({ path: APIPaths.Years, method: "GET", token: auth.token })
+			await fetchHandler({ path: APIPaths.Years, method: "GET", token })
 		);
 		if (_.isNil(error)) {
 			return data.map((year) => {
@@ -28,12 +30,14 @@ export const getYears = createAsyncThunk<YearData[]>(
 export const createYear = createAsyncThunk<YearData, Omit<YearData, "id">>(
 	"years/createYear",
 	async (payload, { rejectWithValue, getState }) => {
-		const { auth } = getState();
+		const {
+			auth: { token }
+		} = getState();
 		const { data, error } = <{ data: YearResponseData; error?: Error }>await fetchHandler({
 			path: APIPaths.Years,
 			method: "POST",
 			body: payload,
-			token: auth.token
+			token
 		});
 		if (_.isNil(error)) {
 			return {
@@ -55,9 +59,9 @@ export const editYear = createAsyncThunk<YearData, Partial<YearData>>(
 			path: `${APIPaths.Years}/:id`,
 			method: "PUT",
 			body: payload,
-            params: {
-                id: payload.id
-            },
+			params: {
+				id: payload.id
+			},
 			token: auth.token
 		});
 		if (_.isNil(error)) {

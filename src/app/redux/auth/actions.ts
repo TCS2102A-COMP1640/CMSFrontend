@@ -20,8 +20,10 @@ export const logoutFromAccount = createAction("auth/logout");
 export const getProfile = createAsyncThunk<AuthProfile, void>(
 	"auth/profile",
 	async (ignored, { rejectWithValue, getState }) => {
-		const { auth } = getState();
-		const { data, error } = await fetchHandler({ path: APIPaths.Auth, method: "GET", token: auth.token });
+		const {
+			auth: { token }
+		} = getState();
+		const { data, error } = await fetchHandler({ path: APIPaths.Auth, method: "GET", token });
 		if (_.isNil(error)) {
 			return data as AuthProfile;
 		}

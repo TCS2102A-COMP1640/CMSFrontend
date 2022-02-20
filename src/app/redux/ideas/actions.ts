@@ -6,12 +6,14 @@ import _ from "lodash";
 export const getIdeas = createAsyncThunk<IdeaResponseData, GetIdeasPayload>(
 	"ideas/getIdeas",
 	async (payload, { rejectWithValue, getState }) => {
-		const { auth } = getState();
+		const {
+			auth: { token }
+		} = getState();
 		const { data, error } = await fetchHandler({
 			path: APIPaths.Ideas,
 			method: "GET",
 			query: payload,
-			token: auth.token
+			token
 		});
 		if (_.isNil(error)) {
 			return data as IdeaResponseData;
@@ -23,12 +25,14 @@ export const getIdeas = createAsyncThunk<IdeaResponseData, GetIdeasPayload>(
 export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
 	"ideas/createIdea",
 	async (payload, { rejectWithValue, getState }) => {
-		const { auth } = getState();
+		const {
+			auth: { token }
+		} = getState();
 		const { data, error } = await fetchHandler({
 			path: APIPaths.Ideas,
 			method: "POST",
 			body: payload,
-			token: auth.token
+			token
 		});
 		if (_.isNil(error)) {
 			return data as IdeaData;

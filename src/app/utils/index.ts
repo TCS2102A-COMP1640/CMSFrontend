@@ -5,6 +5,7 @@ export const APIBase = "http://localhost:5000";
 export const APIPaths = {
 	Auth: `${APIBase}/auth`,
 	Ideas: `${APIBase}/ideas`,
+	Categories: `${APIBase}/categories`,
 	Years: `${APIBase}/years`
 };
 
@@ -71,7 +72,7 @@ export async function fetchHandler(p: FetchParams) {
 			body: JSON.stringify(body)
 		});
 		clearTimeout(timeoutId);
-		if (response.status >= 400) {
+		if (response.status >= 300) {
 			throw {
 				statusCode: response.status
 			};

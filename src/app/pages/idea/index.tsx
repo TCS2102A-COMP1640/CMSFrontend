@@ -16,11 +16,13 @@ import {
 	useMediaQuery,
 	Select,
 	MenuItem,
+	Chip,
+	Box,
 	InputLabel,
 	FormControl,
 	Divider
 } from "@mui/material";
-import { SendOutlined } from "@mui/icons-material";
+import { SendOutlined, CancelOutlined } from "@mui/icons-material";
 import {
 	RootState,
 	IdeaData,
@@ -29,7 +31,8 @@ import {
 	getComments,
 	useAppDispatch,
 	getYears,
-	createIdea
+	createIdea,
+	getCategories
 } from "@app/redux";
 import { Idea } from "@app/components";
 import _ from "lodash";
@@ -55,7 +58,8 @@ export function IdeaPage() {
 		status: ideasStatus,
 		pages: ideasPages
 	} = useSelector((state: RootState) => state.ideas.getIdeas);
-	const { data: yearsData, status: yearsStatus } = useSelector((state: RootState) => state.years.getYears);
+	const { data: yearsData } = useSelector((state: RootState) => state.years.getYears);
+	const { data: categoriesData } = useSelector((state: RootState) => state.categories.getCategories);
 	const [page, setPage] = useState(1);
 	const [openModal, setOpenModal] = useState(false);
 	const [formModal, setFormModal] = useState<Partial<IdeaData>>({});
@@ -79,6 +83,7 @@ export function IdeaPage() {
 
 	useEffect(() => {
 		dispatch(getYears());
+		dispatch(getCategories());
 	}, []);
 
 	useEffect(() => {
@@ -122,6 +127,64 @@ export function IdeaPage() {
 							onChange={(e) => setFormModal({ ...formModal, content: e.target.value })}
 							placeholder="Please tell us your idea here..."
 						/>
+						<FormControl sx={{ minWidth: 110, mt: 2 }}>
+							<InputLabel
+								id="select-category-label"
+								sx={{
+									top: _.isEmpty(formModal.categories) ? -9 : 0,
+									"&.Mui-focused": {
+										top: 0
+									}
+								}}
+							>
+								Category
+							</InputLabel>
+							<Select
+								labelId="select-category-label"
+								label="Category"
+								value={
+									_.isEmpty(formModal.categories)
+										? ""
+										: _.toString(_.first(formModal.categories as number[]))
+								}
+								onChange={(e) => {
+									setFormModal({ ...formModal, categories: [_.toInteger(e.target.value)] });
+								}}
+								renderValue={(value: string) => {
+									return (
+										<Chip
+											sx={{ height: 24 }}
+											label={_.toString(
+												_.find(categoriesData, (data) => value === _.toString(data.id))?.name
+											)}
+											onDelete={() => {}}
+											deleteIcon={
+												<Box
+													display="flex"
+													onMouseDown={(e) => {
+														e.stopPropagation();
+														setFormModal({ ...formModal, categories: [] });
+													}}
+												>
+													<CancelOutlined fontSize="small" />
+												</Box>
+											}
+										/>
+									);
+								}}
+								sx={{
+									height: 36
+								}}
+							>
+								{categoriesData.map((data) => {
+									return (
+										<MenuItem key={data.id} value={_.toString(data.id)}>
+											{data.name}
+										</MenuItem>
+									);
+								})}
+							</Select>
+						</FormControl>
 					</CardContent>
 					<CardActions>
 						<Button
@@ -176,7 +239,11 @@ export function IdeaPage() {
 								}}
 							>
 								{yearsData.map((year) => {
-									return <MenuItem value={year.id}>{year.name}</MenuItem>;
+									return (
+										<MenuItem key={year.id} value={year.id}>
+											{year.name}
+										</MenuItem>
+									);
 								})}
 							</Select>
 						</FormControl>

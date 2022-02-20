@@ -3,6 +3,7 @@ import { configureStore, AsyncThunkPayloadCreator, AsyncThunk, AsyncThunkOptions
 import { persistStore, persistReducer } from "redux-persist";
 import { AuthState, authReducer } from "./auth";
 import { IdeasState, ideasReducer } from "./ideas";
+import { CategoriesState, categoriesReducer } from "./categories";
 import { YearsState, yearsReducer } from "./years";
 import storage from "redux-persist/lib/storage";
 import thunk from "redux-thunk";
@@ -11,13 +12,18 @@ interface RootState {
 	auth: AuthState;
 	ideas: IdeasState;
 	years: YearsState;
+	categories: CategoriesState;
 }
 
 const Store = configureStore({
 	reducer: {
-		auth: persistReducer<AuthState>({ key: "auth", storage, blacklist: ["status", "error"] }, authReducer),
+		auth: persistReducer<AuthState>(
+			{ key: "auth", storage, blacklist: ["status", "error", "profile"] },
+			authReducer
+		),
 		ideas: ideasReducer,
-		years: yearsReducer
+		years: yearsReducer,
+		categories: categoriesReducer
 	},
 	middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(thunk).concat()
 });
@@ -28,12 +34,14 @@ const useAppDispatch = () => useDispatch<AppDispatch>();
 
 export { Store, StorePersistor, RootState, AppDispatch, useAppDispatch };
 export { loginToAccount, logoutFromAccount, getProfile, resetAuthState } from "./auth";
+export { getCategories } from "./categories";
 export { getIdeas, createIdea } from "./ideas";
 export { getComments } from "./comments";
 export { getYears, createYear, editYear, deleteYear } from "./years";
 
 export type { AuthState, LoginPayload } from "./auth";
 export type { CommentData, GetCommentsPayload } from "./comments";
+export type { CategoriesState, CategoryData } from "./categories";
 export type { IdeasState, IdeaData, GetIdeasPayload } from "./ideas";
 export type { YearsState, YearData } from "./years";
 

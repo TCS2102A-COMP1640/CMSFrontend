@@ -15,6 +15,11 @@ export interface IdeaData {
 			name: string;
 		};
 	};
+	categories:
+		| number[]
+		| {
+				id: number;
+		  }[];
 	academicYear?:
 		| number
 		| {
