@@ -27,6 +27,7 @@ import {
 	RootState,
 	IdeaData,
 	CommentData,
+	CategoryData,
 	getIdeas,
 	getComments,
 	useAppDispatch,
@@ -271,6 +272,8 @@ export function IdeaPage() {
 							<Idea
 								department={idea.user.department?.name || "Unknown"}
 								content={idea.content}
+								categories={idea.categories as CategoryData[]}
+								createTimestamp={idea.createTimestamp as Date}
 								defaultReaction="none"
 								onReactionChange={(reaction) => {
 									console.log(reaction);
@@ -299,7 +302,7 @@ export function IdeaPage() {
 				</Grid>
 			)}
 			<Grid item alignSelf="center">
-				{!_.isEmpty(ideasData) ? (
+				{!_.isEmpty(ideasData) && (
 					<Pagination
 						size={mediaQueries.sm ? "medium" : "small"}
 						count={ideasPages === 0 ? 1 : ideasPages}
@@ -311,8 +314,6 @@ export function IdeaPage() {
 							}
 						}}
 					/>
-				) : (
-					""
 				)}
 			</Grid>
 		</Grid>

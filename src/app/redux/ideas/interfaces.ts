@@ -1,4 +1,5 @@
 import { Status } from "@app/utils";
+import { CategoryData, YearData } from "@app/redux";
 
 export interface GetIdeasPayload {
 	page: number;
@@ -15,16 +16,24 @@ export interface IdeaData {
 			name: string;
 		};
 	};
-	categories:
-		| number[]
-		| {
-				id: number;
-		  }[];
-	academicYear?:
-		| number
-		| {
-				id: number;
-		  };
+	categories: number[] | CategoryData[];
+	reactions: {
+		id: number;
+		type: number;
+	}[];
+	comments: {
+		id: number;
+		content: string;
+	}[];
+	views: {
+		id: number;
+	}[];
+	documents: {
+		id: number;
+		path: string;
+	}[];
+	academicYear?: number | YearData;
+	createTimestamp: string | Date;
 }
 
 export interface IdeaResponseData {

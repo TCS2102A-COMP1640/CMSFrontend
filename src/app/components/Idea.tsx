@@ -9,12 +9,14 @@ import {
 	AccordionSummary,
 	AccordionDetails,
 	Theme,
+	Chip,
 	TextField,
 	useMediaQuery
 } from "@mui/material";
 import { ThumbUp, ThumbDown, Comment, ExpandMore } from "@mui/icons-material";
 import { Status } from "@app/utils";
-import { CommentData } from "@app/redux";
+import { CategoryData, CommentData } from "@app/redux";
+import { format } from "date-fns";
 import _ from "lodash";
 
 type IdeaReactionTypes = "up" | "down" | "none";
@@ -22,13 +24,15 @@ type IdeaReactionTypes = "up" | "down" | "none";
 export interface IdeaProps {
 	department: string;
 	content: string;
+	categories: CategoryData[];
+	createTimestamp: Date;
 	defaultReaction: IdeaReactionTypes;
 	onReactionChange?: (reaction: IdeaReactionTypes) => void;
 	onLoadComments?: (callback: (status: Status, data: CommentData[]) => void) => void;
 }
 
 function IdeaInternal(props: IdeaProps) {
-	const { department, content, defaultReaction } = props;
+	const { department, content, categories, createTimestamp, defaultReaction } = props;
 	const [reaction, setReaction] = useState(defaultReaction);
 	const [comments, setComments] = useState<CommentData[]>([]);
 	const [inputComment, setInputComment] = useState("");
@@ -49,9 +53,19 @@ function IdeaInternal(props: IdeaProps) {
 
 	return (
 		<Accordion>
-			<AccordionSummary expandIcon={<ExpandMore />}>
-				<Typography fontSize={18} variant={mediaQueries.sm ? "h5" : "h6"}>
+			<AccordionSummary
+				sx={{
+					"& .MuiAccordionSummary-content": {
+						flexDirection: "column"
+					}
+				}}
+				expandIcon={<ExpandMore />}
+			>
+				<Typography display="block" fontSize={18} variant={mediaQueries.sm ? "h5" : "h6"}>
 					{department}
+				</Typography>
+				<Typography color="gray" variant="caption">
+					{format(createTimestamp, "dd/MM/yyyy hh:mm:ss")}
 				</Typography>
 			</AccordionSummary>
 			<AccordionDetails>
@@ -61,6 +75,14 @@ function IdeaInternal(props: IdeaProps) {
 					</Grid>
 					<br />
 					<Grid item>
+						{!_.isEmpty(categories) && (
+							<Stack direction="row" spacing={2}>
+								{categories.map((category) => (
+									<Chip sx={{ height: 24 }} label={category.name} />
+								))}
+							</Stack>
+						)}
+						{!_.isEmpty(categories) && <br />}
 						<Stack direction="row" spacing={2}>
 							<IconButton
 								onClick={() => {

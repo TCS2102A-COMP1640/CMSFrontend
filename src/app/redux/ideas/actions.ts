@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
 import { IdeaResponseData, IdeaData, GetIdeasPayload } from "./interfaces";
+import { parseISO } from "date-fns";
 import _ from "lodash";
 
 export const getIdeas = createAsyncThunk<IdeaResponseData, GetIdeasPayload>(
@@ -16,6 +17,12 @@ export const getIdeas = createAsyncThunk<IdeaResponseData, GetIdeasPayload>(
 			token
 		});
 		if (_.isNil(error)) {
+			(data as IdeaResponseData).data = data.data.map((idea: IdeaData) => {
+				return {
+					...idea,
+					createTimestamp: parseISO(idea.createTimestamp as string)
+				};
+			});
 			return data as IdeaResponseData;
 		}
 		return rejectWithValue(error);
