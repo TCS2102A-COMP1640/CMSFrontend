@@ -33,7 +33,8 @@ import {
 	useAppDispatch,
 	getYears,
 	createIdea,
-	getCategories
+	getCategories,
+	IdeaDocumentData
 } from "@app/redux";
 import { Idea } from "@app/components";
 import _ from "lodash";
@@ -186,6 +187,17 @@ export function IdeaPage() {
 								})}
 							</Select>
 						</FormControl>
+						<Button variant="outlined" component="label" sx={{ mt: 2, ml: 1 }}>
+							Upload documents
+							<input
+								onChange={(e) => {
+									setFormModal({ ...formModal, documents: e.target.files as FileList });
+								}}
+								type="file"
+								multiple
+								hidden
+							/>
+						</Button>
 					</CardContent>
 					<CardActions>
 						<Button
@@ -253,7 +265,24 @@ export function IdeaPage() {
 					<Grid item>
 						<Button
 							variant="outlined"
-							disabled={_.isUndefined(formModal.academicYear) ? true : false}
+							disabled={
+								_.isUndefined(formModal.academicYear)
+									? true
+									: (() => {
+											const year = _.find(
+												yearsData,
+												(year) => year.id === (formModal.academicYear as number)
+											);
+											if (!_.isUndefined(year)) {
+												const date = new Date();
+												if (year.openingDate <= date && date <= year.closureDate) {
+													return false;
+												}
+											}
+
+											return true;
+									  })()
+							}
 							endIcon={<SendOutlined />}
 							onClick={() => setOpenModal(true)}
 						>
@@ -273,6 +302,7 @@ export function IdeaPage() {
 								department={idea.user.department?.name || "Unknown"}
 								content={idea.content}
 								categories={idea.categories as CategoryData[]}
+								documents={idea.documents as IdeaDocumentData[]}
 								createTimestamp={idea.createTimestamp as Date}
 								defaultReaction="none"
 								onReactionChange={(reaction) => {

@@ -7,6 +7,12 @@ export interface GetIdeasPayload {
 	academicYear: number;
 }
 
+export interface IdeaDocumentData {
+	id: number;
+	name: string;
+	path: string;
+}
+
 export interface IdeaData {
 	id: number;
 	content: string;
@@ -28,10 +34,7 @@ export interface IdeaData {
 	views: {
 		id: number;
 	}[];
-	documents: {
-		id: number;
-		path: string;
-	}[];
+	documents: FileList | IdeaDocumentData[];
 	academicYear?: number | YearData;
 	createTimestamp: string | Date;
 }

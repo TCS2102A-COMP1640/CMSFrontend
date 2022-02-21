@@ -35,10 +35,24 @@ export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
 		const {
 			auth: { token }
 		} = getState();
+		const body = new FormData();
+		body.append("content", payload.content as string);
+		body.append("academicYear", _.toString(payload.academicYear));
+
+		if (!_.isUndefined(payload.categories)) {
+			body.append("categories", JSON.stringify(payload.categories));
+		}
+		if (!_.isUndefined(payload.documents)) {
+			Array.from(payload.documents as FileList).forEach((file) => {
+				body.append("documents", file);
+			});
+		}
+
 		const { data, error } = await fetchHandler({
 			path: APIPaths.Ideas,
 			method: "POST",
-			body: payload,
+			multipart: true,
+			body,
 			token
 		});
 		if (_.isNil(error)) {
