@@ -11,4 +11,18 @@ export interface CategoriesState {
 		status: Status;
 		error?: Error;
 	};
+	createCategories: {
+		status: Status;
+		error?: Error;
+	};
+	deleteCategories: {
+		status: Status;
+		error?: Error;
+	};
+	
 }
+
+export interface CategoiryResponseData extends Pick<CategoryData, "id" | "name"> {
+	categoriesStatus: string;
+}
+
