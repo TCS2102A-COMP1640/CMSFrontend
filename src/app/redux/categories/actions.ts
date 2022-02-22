@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
-import { CategoryData,  CategoiryResponseData} from "./interfaces";
+import { CategoryData, CategoiryResponseData } from "./interfaces";
 import _ from "lodash";
 
 export const getCategories = createAsyncThunk<CategoryData[]>(
@@ -31,7 +31,7 @@ export const createCategories = createAsyncThunk<CategoryData, Omit<CategoryData
 		});
 		if (_.isNil(error)) {
 			return {
-				...data,
+				...data
 				//CategoryData: parseISO(data.CategoryData),
 			};
 		}
@@ -56,7 +56,7 @@ export const editCategories = createAsyncThunk<CategoryData, Partial<CategoryDat
 		});
 		if (_.isNil(error)) {
 			return {
-				...data,
+				...data
 				//CategoryData: parseISO(data.CategoryData),
 			};
 		}

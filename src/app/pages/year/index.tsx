@@ -100,7 +100,7 @@ export function YearPage() {
 	const performCloseModal = () => {
 		setFormModal({});
 		setOpenModal(false);
-        setCaptionsModal({});
+		setCaptionsModal({});
 	};
 
 	return (

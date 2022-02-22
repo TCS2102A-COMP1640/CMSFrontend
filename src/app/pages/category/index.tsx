@@ -31,7 +31,7 @@ const tableCells = [
 	},
 	{
 		label: "Name"
-	},
+	}
 ];
 
 interface Captions {
@@ -72,7 +72,7 @@ export function CategoryPage() {
 	const performCloseModal = () => {
 		setFormModal({});
 		setOpenModal(false);
-        setCaptionsModal({});
+		setCaptionsModal({});
 	};
 
 	return (
