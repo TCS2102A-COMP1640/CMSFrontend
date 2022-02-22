@@ -16,6 +16,7 @@ export interface FetchParams {
 	params?: { [index: string]: any };
 	body?: { [index: string]: any } | FormData;
 	query?: { [index: string]: any };
+	multipart?: boolean;
 	token?: string;
 	method: "GET" | "PUT" | "POST" | "PATCH" | "DELETE";
 	mode?: RequestMode;
@@ -42,16 +43,13 @@ export function isTokenExpired(token: string) {
 }
 
 export async function fetchHandler(p: FetchParams) {
-	const { path, params, body, query, token, method, mode } = p;
+	const { path, params, body, query, token, method, multipart, mode } = p;
 	try {
 		const abort = new AbortController();
 		const signal = abort.signal;
 		const headers = new Headers();
-		if (!_.isNil(body)) {
-			headers.set(
-				"Content-Type",
-				body instanceof FormData ? "application/x-www-form-urlencoded" : "application/json"
-			);
+		if (!_.isNil(body) && !(body instanceof FormData)) {
+			headers.set("Content-Type", "application/json");
 		}
 		if (!_.isNil(token) && !_.isEmpty(token)) {
 			headers.set("Authorization", `Bearer ${token}`);
@@ -69,7 +67,18 @@ export async function fetchHandler(p: FetchParams) {
 			signal,
 			headers,
 			mode: mode || "cors",
-			body: JSON.stringify(body)
+			body: !(body instanceof FormData)
+				? JSON.stringify(body)
+				: (() => {
+						if (multipart) {
+							return body;
+						}
+						const formData = new URLSearchParams();
+						for (const pair of body.entries()) {
+							formData.append(pair[0], pair[1] as string);
+						}
+						return formData;
+				  })()
 		});
 		clearTimeout(timeoutId);
 		if (response.status >= 300) {

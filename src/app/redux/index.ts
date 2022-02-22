@@ -42,7 +42,7 @@ export { getYears, createYear, editYear, deleteYear } from "./years";
 export type { AuthState, LoginPayload } from "./auth";
 export type { CommentData, GetCommentsPayload } from "./comments";
 export type { CategoriesState, CategoryData } from "./categories";
-export type { IdeasState, IdeaData, GetIdeasPayload } from "./ideas";
+export type { IdeasState, IdeaData, IdeaDocumentData, GetIdeasPayload } from "./ideas";
 export type { YearsState, YearData } from "./years";
 
 // Reference: https://stackoverflow.com/questions/64793504/cannot-set-getstate-type-to-rootstate-in-createasyncthunk

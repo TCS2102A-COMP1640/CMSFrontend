@@ -9,7 +9,7 @@
 		"baseUrl": "src",
 		"module": "es6",
 		"target": "es2021",
-		"lib": ["es6", "dom"],
+		"lib": ["es6", "dom", "dom.iterable"],
 		"jsx": "react",
 		"paths": {
 			"@app/*": ["app/*", "app"]

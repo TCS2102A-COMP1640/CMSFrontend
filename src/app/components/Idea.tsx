@@ -11,11 +11,12 @@ import {
 	Theme,
 	Chip,
 	TextField,
-	useMediaQuery
+	useMediaQuery,
+	Tooltip
 } from "@mui/material";
 import { ThumbUp, ThumbDown, Comment, ExpandMore } from "@mui/icons-material";
 import { Status } from "@app/utils";
-import { CategoryData, CommentData } from "@app/redux";
+import { CategoryData, CommentData, IdeaDocumentData } from "@app/redux";
 import { format } from "date-fns";
 import _ from "lodash";
 
@@ -25,6 +26,7 @@ export interface IdeaProps {
 	department: string;
 	content: string;
 	categories: CategoryData[];
+	documents: IdeaDocumentData[];
 	createTimestamp: Date;
 	defaultReaction: IdeaReactionTypes;
 	onReactionChange?: (reaction: IdeaReactionTypes) => void;
@@ -32,7 +34,7 @@ export interface IdeaProps {
 }
 
 function IdeaInternal(props: IdeaProps) {
-	const { department, content, categories, createTimestamp, defaultReaction } = props;
+	const { department, content, categories, documents, createTimestamp, defaultReaction } = props;
 	const [reaction, setReaction] = useState(defaultReaction);
 	const [comments, setComments] = useState<CommentData[]>([]);
 	const [inputComment, setInputComment] = useState("");
@@ -83,6 +85,16 @@ function IdeaInternal(props: IdeaProps) {
 							</Stack>
 						)}
 						{!_.isEmpty(categories) && <br />}
+						{!_.isEmpty(documents) && (
+							<Stack direction="row" spacing={2}>
+								{documents.map((document) => (
+									<Tooltip title={document.name}>
+										<Chip clickable sx={{ height: 24, maxWidth: 120 }} label={document.name} />
+									</Tooltip>
+								))}
+							</Stack>
+						)}
+						{!_.isEmpty(documents) && <br />}
 						<Stack direction="row" spacing={2}>
 							<IconButton
 								onClick={() => {
@@ -153,40 +165,3 @@ function IdeaInternal(props: IdeaProps) {
 }
 
 export const Idea = memo(IdeaInternal);
-
-/*
-
-					<div>
-						<IconButton
-							aria-label="more"
-							id="long-button"
-							aria-controls={open ? "long-menu" : undefined}
-							aria-expanded={open ? "true" : undefined}
-							aria-haspopup="true"
-							onClick={handleClick}
-						>
-							<MoreVertIcon />
-						</IconButton>
-						<Menu
-							id="long-menu"
-							MenuListProps={{
-								"aria-labelledby": "long-button"
-							}}
-							anchorEl={anchorEl}
-							open={open}
-							onClose={handleClose}
-							PaperProps={{
-								style: {
-									maxHeight: ITEM_HEIGHT * 4.5,
-									width: "20ch"
-								}
-							}}
-						>
-							{options.map((option) => (
-								<MenuItem key={option} selected={option === "Pyxis"} onClick={handleClose}>
-									{option}
-								</MenuItem>
-							))}
-						</Menu>
-					</div>
-                    */
