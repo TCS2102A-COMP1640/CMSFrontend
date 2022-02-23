@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { YearsState } from "./interfaces";
-import { getYears, createYear, deleteYear } from "./actions";
+import { getYears, createYear, editYear, deleteYear } from "./actions";
 import _ from "lodash";
 
 const yearsState: YearsState = {
@@ -9,6 +9,9 @@ const yearsState: YearsState = {
 		status: "idle"
 	},
 	createYear: {
+		status: "idle"
+	},
+	editYear: {
 		status: "idle"
 	},
 	deleteYear: {
@@ -42,6 +45,16 @@ const yearsSlice = createSlice({
 			})
 			.addCase(createYear.fulfilled, (state, action) => {
 				state.createYear.status = "idle";
+			})
+			.addCase(editYear.pending, (state, action) => {
+				state.editYear.status = "pending";
+				state.editYear.error = undefined;
+			})
+			.addCase(editYear.rejected, (state, action) => {
+				state.editYear.status = "idle";
+			})
+			.addCase(editYear.fulfilled, (state, action) => {
+				state.editYear.status = "idle";
 			})
 			.addCase(deleteYear.pending, (state, action) => {
 				state.deleteYear.status = "pending";

@@ -82,7 +82,7 @@ export function HomePage() {
 	useEffect(() => {
 		if (isTokenExpired(token)) {
 			dispatch(resetAuthState());
-			navigate("/login");
+			navigate("/profile");
 		}
 	}, [location]);
 

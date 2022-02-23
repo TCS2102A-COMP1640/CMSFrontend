@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Box, Paper, Grid, Avatar, Button, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import { RootState, getProfile } from "@app/redux";
 import _ from "lodash";
 

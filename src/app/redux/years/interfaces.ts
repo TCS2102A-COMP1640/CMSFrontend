@@ -24,6 +24,10 @@ export interface YearsState {
 		status: Status;
 		error?: Error;
 	};
+	editYear: {
+		status: Status;
+		error?: Error;
+	};
 	deleteYear: {
 		status: Status;
 		error?: Error;
