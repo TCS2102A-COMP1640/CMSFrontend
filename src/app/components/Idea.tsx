@@ -14,9 +14,9 @@ import {
 	useMediaQuery,
 	Tooltip
 } from "@mui/material";
-import { ThumbUp, ThumbDown, Comment, ExpandMore } from "@mui/icons-material";
+import { ThumbUp, ThumbDown, Comment, ExpandMore, SendOutlined } from "@mui/icons-material";
 import { Status } from "@app/utils";
-import { CategoryData, CommentData, IdeaDocumentData } from "@app/redux";
+import { CategoryData, IdeaCommentData, IdeaDocumentData } from "@app/redux";
 import { format } from "date-fns";
 import _ from "lodash";
 
@@ -29,14 +29,16 @@ export interface IdeaProps {
 	documents: IdeaDocumentData[];
 	createTimestamp: Date;
 	defaultReaction: IdeaReactionTypes;
+	disableComment?: boolean;
 	onReactionChange?: (reaction: IdeaReactionTypes) => void;
-	onLoadComments?: (callback: (status: Status, data: CommentData[]) => void) => void;
+	onLoadComments?: (callback: (status: Status, data: IdeaCommentData[]) => void) => void;
+	onSubmitComment?: (comment: string) => void;
 }
 
 function IdeaInternal(props: IdeaProps) {
-	const { department, content, categories, documents, createTimestamp, defaultReaction } = props;
+	const { department, content, categories, documents, disableComment, createTimestamp, defaultReaction } = props;
 	const [reaction, setReaction] = useState(defaultReaction);
-	const [comments, setComments] = useState<CommentData[]>([]);
+	const [comments, setComments] = useState<IdeaCommentData[]>([]);
 	const [inputComment, setInputComment] = useState("");
 	const [openComments, setOpenComments] = useState(false);
 	const [loadingComments, setLoadingComments] = useState(false);
@@ -113,10 +115,14 @@ function IdeaInternal(props: IdeaProps) {
 							<IconButton
 								onClick={() => {
 									if (!openComments) {
-										_.invoke(props, "onLoadComments", (status: Status, comments: CommentData[]) => {
-											setComments(comments);
-											setLoadingComments(status === "pending" ? true : false);
-										});
+										_.invoke(
+											props,
+											"onLoadComments",
+											(status: Status, comments: IdeaCommentData[]) => {
+												setComments(comments);
+												setLoadingComments(status === "pending" ? true : false);
+											}
+										);
 									}
 									setOpenComments(!openComments);
 								}}
@@ -131,24 +137,38 @@ function IdeaInternal(props: IdeaProps) {
 					<Grid item alignSelf="left" display={openComments && !loadingComments ? "block" : "none"}>
 						<Grid container spacing={2} flexDirection="column">
 							<Grid item xs>
-								<TextField
-									onChange={(e) => setInputComment(e.target.value)}
-									multiline
-									fullWidth
-									rows={1}
-									placeholder="Write a comment"
-									InputProps={{
-										sx: {
-											height: 30
-										}
-									}}
-								/>
+								<Stack direction="row">
+									<TextField
+										onChange={(e) => setInputComment(e.target.value)}
+										multiline
+										rows={1}
+										disabled={disableComment}
+										placeholder="Write a comment"
+										sx={{
+											flexGrow: 1
+										}}
+										InputProps={{
+											sx: {
+												height: 23
+											}
+										}}
+									/>
+									<IconButton
+										disabled={disableComment}
+										sx={{ height: 33, width: 33 }}
+										onClick={() => {
+											_.invoke(props, "onSubmitComment", inputComment);
+										}}
+									>
+										<SendOutlined fontSize="small" />
+									</IconButton>
+								</Stack>
 							</Grid>
 							{comments.map((comment) => {
 								return (
 									<Grid item justifyContent="left">
 										<Typography textAlign="left" variant="subtitle2" fontWeight={600}>
-											{comment.user.department.name}
+											{comment.user.department?.name ?? "Unknown"}
 										</Typography>
 										<Typography textAlign="left" variant="body2">
 											{comment.content}

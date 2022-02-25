@@ -23,7 +23,7 @@ export function ProfilePage() {
 					Role: {profile?.role.name.charAt(0).toUpperCase()}
 					{profile?.role.name.slice(1)}
 				</Typography>
-				<Typography>Department: {profile?.department?.name || "None"} </Typography>
+				<Typography>Department: {profile?.department?.name ?? "None"} </Typography>
 			</Paper>
 		</Box>
 	);

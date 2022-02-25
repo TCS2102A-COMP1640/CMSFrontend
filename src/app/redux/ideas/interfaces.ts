@@ -13,6 +13,18 @@ export interface IdeaDocumentData {
 	path: string;
 }
 
+export interface IdeaCommentData {
+	id: number;
+	content: string;
+	createTimestamp: string | Date;
+	user: {
+		id: number;
+		department?: {
+			name: string;
+		};
+	};
+}
+
 export interface IdeaData {
 	id: number;
 	content: string;
@@ -27,10 +39,7 @@ export interface IdeaData {
 		id: number;
 		type: number;
 	}[];
-	comments: {
-		id: number;
-		content: string;
-	}[];
+	comments: IdeaCommentData[];
 	views: {
 		id: number;
 	}[];

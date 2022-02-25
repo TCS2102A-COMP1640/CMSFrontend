@@ -26,15 +26,14 @@ import { SendOutlined, CancelOutlined } from "@mui/icons-material";
 import {
 	RootState,
 	IdeaData,
-	CommentData,
 	CategoryData,
 	getIdeas,
-	getComments,
 	useAppDispatch,
 	getYears,
 	createIdea,
 	getCategories,
-	IdeaDocumentData
+	IdeaDocumentData,
+	createIdeaComment
 } from "@app/redux";
 import { Idea } from "@app/components";
 import _ from "lodash";
@@ -305,18 +304,32 @@ export function IdeaPage() {
 								documents={idea.documents as IdeaDocumentData[]}
 								createTimestamp={idea.createTimestamp as Date}
 								defaultReaction="none"
+								disableComment={
+									_.isUndefined(formModal.academicYear)
+										? true
+										: (() => {
+												const year = _.find(
+													yearsData,
+													(year) => year.id === (formModal.academicYear as number)
+												);
+												if (!_.isUndefined(year)) {
+													const date = new Date();
+													if (year.openingDate <= date && date <= year.finalClosureDate) {
+														return false;
+													}
+												}
+
+												return true;
+										  })()
+								}
 								onReactionChange={(reaction) => {
 									console.log(reaction);
 								}}
 								onLoadComments={(callback) => {
-									callback("pending", []);
-									dispatch(getComments({ ideaId: 1 })).then((data) => {
-										let comments: CommentData[] = [];
-										if (data.meta.requestStatus === "fulfilled") {
-											comments = data.payload as CommentData[];
-										}
-										callback("idle", comments);
-									});
+									callback("idle", idea.comments);
+								}}
+								onSubmitComment={(comment) => {
+									dispatch(createIdeaComment({ ideaId: idea.id, content: comment }));
 								}}
 							/>
 						</Grid>

@@ -35,14 +35,12 @@ const useAppDispatch = () => useDispatch<AppDispatch>();
 export { Store, StorePersistor, RootState, AppDispatch, useAppDispatch };
 export { loginToAccount, logoutFromAccount, getProfile, resetAuthState } from "./auth";
 export { getCategories, createCategory, editCategory, deleteCategory } from "./categories";
-export { getIdeas, createIdea } from "./ideas";
-export { getComments } from "./comments";
+export { getIdeas, createIdea, createIdeaComment } from "./ideas";
 export { getYears, createYear, editYear, deleteYear } from "./years";
 
 export type { AuthState, LoginPayload } from "./auth";
-export type { CommentData, GetCommentsPayload } from "./comments";
 export type { CategoriesState, CategoryData } from "./categories";
-export type { IdeasState, IdeaData, IdeaDocumentData, GetIdeasPayload } from "./ideas";
+export type { IdeasState, IdeaData, IdeaDocumentData, IdeaCommentData, GetIdeasPayload } from "./ideas";
 export type { YearsState, YearData } from "./years";
 
 // Reference: https://stackoverflow.com/questions/64793504/cannot-set-getstate-type-to-rootstate-in-createasyncthunk

@@ -63,7 +63,7 @@ export function HomePage() {
 	const dispatch = useDispatch();
 	const { token } = useSelector((state: RootState) => state.auth);
 	const [openDrawer, setOpenDrawer] = useState(false);
-	const [selectedItem, setSelectedItem] = useState(menuItems[0].name);
+	const [selectedItem, setSelectedItem] = useState(menuItems[1].name);
 	const mediaQueries = {
 		sm: useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"))
 	};
@@ -76,13 +76,13 @@ export function HomePage() {
 		if (mediaQueries.sm) {
 			setOpenDrawer(false);
 		}
-		navigate("/idea");
+		navigate(`/${selectedItem.toLowerCase()}`);
 	}, []);
 
 	useEffect(() => {
 		if (isTokenExpired(token)) {
 			dispatch(resetAuthState());
-			navigate("/profile");
+			navigate("/login");
 		}
 	}, [location]);
 

@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { IdeasState } from "./interfaces";
-import { getIdeas, createIdea } from "./actions";
+import { getIdeas, createIdea, createIdeaComment } from "./actions";
 import _ from "lodash";
 
 const ideasState: IdeasState = {
