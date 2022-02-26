@@ -33,7 +33,9 @@ import {
 	createIdea,
 	getCategories,
 	IdeaDocumentData,
-	createIdeaComment
+	createIdeaComment,
+	IdeaCommentData,
+	getIdeaComments
 } from "@app/redux";
 import { Idea } from "@app/components";
 import _ from "lodash";
@@ -326,10 +328,27 @@ export function IdeaPage() {
 									console.log(reaction);
 								}}
 								onLoadComments={(callback) => {
-									callback("idle", idea.comments);
+									callback("pending", []);
+									dispatch(getIdeaComments({ id: idea.id })).then((data) => {
+										callback(
+											"idle",
+											data.meta.requestStatus === "fulfilled"
+												? (data.payload as IdeaCommentData[])
+												: []
+										);
+									});
 								}}
-								onSubmitComment={(comment) => {
-									dispatch(createIdeaComment({ ideaId: idea.id, content: comment }));
+								onSubmitComment={(comment, callback) => {
+									callback("pending");
+									dispatch(
+										createIdeaComment({
+											id: idea.id,
+											academicYear: formModal.academicYear as number,
+											content: comment
+										})
+									).then(() => {
+										callback("idle");
+									});
 								}}
 							/>
 						</Grid>

@@ -1,9 +1,8 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
-import { IdeaResponseData, IdeaData, GetIdeasPayload } from "./interfaces";
+import { IdeaResponseData, IdeaCommentData, IdeaData, GetIdeasPayload } from "./interfaces";
 import { parseISO } from "date-fns";
 import _ from "lodash";
-import { IdeaCommentData } from ".";
 
 export const getIdeas = createAsyncThunk<IdeaResponseData, GetIdeasPayload>(
 	"ideas/getIdeas",
@@ -11,26 +10,44 @@ export const getIdeas = createAsyncThunk<IdeaResponseData, GetIdeasPayload>(
 		const {
 			auth: { token }
 		} = getState();
-		const { data, error } = await fetchHandler({
+		const { data, error } = <{ data: IdeaResponseData; error?: Error }>await fetchHandler({
 			path: APIPaths.Ideas,
 			method: "GET",
 			query: payload,
 			token
 		});
 		if (_.isNil(error)) {
-			(data as IdeaResponseData).data = data.data.map((idea: IdeaData) => {
+			data.data = data.data.map((idea: IdeaData) => {
 				return {
 					...idea,
-					comments: idea.comments.map((comment) => {
-						return {
-							...comment,
-							createTimestamp: parseISO(comment.createTimestamp as string)
-						};
-					}),
 					createTimestamp: parseISO(idea.createTimestamp as string)
 				};
 			});
-			return data as IdeaResponseData;
+			return data;
+		}
+		return rejectWithValue(error);
+	}
+);
+
+export const getIdeaComments = createAsyncThunk<IdeaCommentData[], { id: number }>(
+	"ideas/getIdeaComments",
+	async (payload, { rejectWithValue, getState }) => {
+		const {
+			auth: { token }
+		} = getState();
+		const { data, error } = <{ data: IdeaCommentData[]; error?: Error }>await fetchHandler({
+			path: `${APIPaths.Ideas}/:id/comments`,
+			method: "GET",
+			params: payload,
+			token
+		});
+		if (_.isNil(error)) {
+			return data.map((comment: IdeaCommentData) => {
+				return {
+					...comment,
+					createTimestamp: parseISO(comment.createTimestamp as string)
+				};
+			});
 		}
 		return rejectWithValue(error);
 	}
@@ -55,7 +72,7 @@ export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
 			});
 		}
 
-		const { data, error } = await fetchHandler({
+		const { data, error } = <{ data: IdeaData; error?: Error }>await fetchHandler({
 			path: APIPaths.Ideas,
 			method: "POST",
 			multipart: true,
@@ -63,7 +80,7 @@ export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
 			token
 		});
 		if (_.isNil(error)) {
-			return data as IdeaData;
+			return data;
 		}
 		return rejectWithValue(error);
 	}
@@ -71,24 +88,24 @@ export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
 
 export const createIdeaComment = createAsyncThunk<
 	IdeaCommentData,
-	Pick<IdeaCommentData, "content"> & { ideaId: number }
+	Pick<IdeaCommentData, "id" | "content"> & { academicYear: number }
 >("ideas/createIdeaComment", async (payload, { rejectWithValue, getState }) => {
 	const {
 		auth: { token }
 	} = getState();
 
-	const { data, error } = await fetchHandler({
+	const { data, error } = <{ data: IdeaCommentData; error?: Error }>await fetchHandler({
 		path: `${APIPaths.Ideas}/:id/comments`,
 		method: "POST",
-		body: _.omit(payload, "ideaId"),
+		body: _.omit(payload, "id"),
 		params: {
-			id: payload.ideaId
+			id: payload.id
 		},
 		token
 	});
 
 	if (_.isNil(error)) {
-		return data as IdeaCommentData;
+		return data;
 	}
 
 	return rejectWithValue(error);

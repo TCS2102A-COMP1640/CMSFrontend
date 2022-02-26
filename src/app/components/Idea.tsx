@@ -32,7 +32,7 @@ export interface IdeaProps {
 	disableComment?: boolean;
 	onReactionChange?: (reaction: IdeaReactionTypes) => void;
 	onLoadComments?: (callback: (status: Status, data: IdeaCommentData[]) => void) => void;
-	onSubmitComment?: (comment: string) => void;
+	onSubmitComment?: (comment: string, callback: (status: Status) => void) => void;
 }
 
 function IdeaInternal(props: IdeaProps) {
@@ -157,7 +157,18 @@ function IdeaInternal(props: IdeaProps) {
 										disabled={disableComment}
 										sx={{ height: 33, width: 33 }}
 										onClick={() => {
-											_.invoke(props, "onSubmitComment", inputComment);
+											_.invoke(props, "onSubmitComment", inputComment, (status: Status) => {
+												if (status === "idle") {
+													_.invoke(
+														props,
+														"onLoadComments",
+														(status: Status, comments: IdeaCommentData[]) => {
+															setComments(comments);
+															setLoadingComments(status === "pending" ? true : false);
+														}
+													);
+												}
+											});
 										}}
 									>
 										<SendOutlined fontSize="small" />

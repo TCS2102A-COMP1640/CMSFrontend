@@ -35,7 +35,7 @@ const useAppDispatch = () => useDispatch<AppDispatch>();
 export { Store, StorePersistor, RootState, AppDispatch, useAppDispatch };
 export { loginToAccount, logoutFromAccount, getProfile, resetAuthState } from "./auth";
 export { getCategories, createCategory, editCategory, deleteCategory } from "./categories";
-export { getIdeas, createIdea, createIdeaComment } from "./ideas";
+export { getIdeas, getIdeaComments, createIdea, createIdeaComment } from "./ideas";
 export { getYears, createYear, editYear, deleteYear } from "./years";
 
 export type { AuthState, LoginPayload } from "./auth";

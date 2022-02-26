@@ -39,7 +39,6 @@ export interface IdeaData {
 		id: number;
 		type: number;
 	}[];
-	comments: IdeaCommentData[];
 	views: {
 		id: number;
 	}[];

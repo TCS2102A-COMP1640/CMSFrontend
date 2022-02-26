@@ -9,9 +9,11 @@ export const getCategories = createAsyncThunk<CategoryData[]>(
 		const {
 			auth: { token }
 		} = getState();
-		const { data, error } = await fetchHandler({ path: APIPaths.Categories, method: "GET", token });
+		const { data, error } = <{ data: CategoryData[]; error?: Error }>(
+			await fetchHandler({ path: APIPaths.Categories, method: "GET", token })
+		);
 		if (_.isNil(error)) {
-			return data as CategoryData[];
+			return data;
 		}
 		return rejectWithValue(error);
 	}
