@@ -5,4 +5,5 @@ export * from "./categories";
 export * from "./ideas";
 export * from "./years";
 export * from "./users";
+export * from "./roles";
 export * from "./messages";

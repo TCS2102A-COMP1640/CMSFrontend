@@ -7,6 +7,7 @@ import { YearsState } from "./years";
 import { Store } from "./store";
 import { UsersState } from "./users";
 import { MessagesState } from "./messages";
+import { RolesState } from "./roles";
 
 export interface RootState {
 	auth: AuthState;
@@ -14,6 +15,7 @@ export interface RootState {
 	years: YearsState;
 	categories: CategoriesState;
 	users: UsersState;
+	roles: RolesState;
 	messages: MessagesState;
 }
 

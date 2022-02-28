@@ -19,11 +19,23 @@ import {
 	CardActions,
 	Modal,
 	Typography,
-    FormControl,
-    Select
+	FormControl,
+	Select,
+	MenuItem,
+	InputLabel
 } from "@mui/material";
 import { AddCircleOutlined, EditOutlined, DeleteOutlined, CancelOutlined } from "@mui/icons-material";
-import { RootState, useAppDispatch, UserData, getUsers, createUser, editUser, deleteUser } from "@app/redux";
+import {
+	RootState,
+	useAppDispatch,
+	UserData,
+	getUsers,
+	createUser,
+	editUser,
+	deleteUser,
+	getRoles,
+	RoleData
+} from "@app/redux";
 import _ from "lodash";
 
 const tableCells = [
@@ -60,7 +72,8 @@ interface Captions {
 
 export function UserPage() {
 	const dispatch = useAppDispatch();
-	const { data } = useSelector((state: RootState) => state.users.getUsers);
+	const { data: usersData } = useSelector((state: RootState) => state.users.getUsers);
+	const { data: rolesData } = useSelector((state: RootState) => state.roles.getRoles);
 	const [mode, setMode] = useState<"create" | "edit" | "delete">("create");
 	const [openModal, setOpenModal] = useState(false);
 	const [formModal, setFormModal] = useState<Partial<UserData>>({});
@@ -68,6 +81,7 @@ export function UserPage() {
 
 	useEffect(() => {
 		dispatch(getUsers());
+		dispatch(getRoles());
 	}, []);
 
 	const validate = () => {
@@ -155,12 +169,39 @@ export function UserPage() {
 									</Grid>
 								)}
 								<Grid item>
-                                    <FormControl>
-                                        <Select>
-                                            
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
+									<FormControl sx={{ minWidth: 80 }}>
+										<InputLabel
+											id="select-role-label"
+											sx={{
+												top: _.isUndefined(formModal.role) ? -9 : 0,
+												"&.Mui-focused": {
+													top: 0
+												}
+											}}
+										>
+											Role
+										</InputLabel>
+										<Select
+											labelId="select-role-label"
+											label="Role"
+											value={formModal.role}
+											onChange={(e) =>
+												setFormModal({ ...formModal, role: e.target.value as number })
+											}
+											sx={{
+												height: 36
+											}}
+										>
+											{rolesData.map((role) => {
+												return (
+													<MenuItem key={role.id} value={role.id}>
+														{role.name}
+													</MenuItem>
+												);
+											})}
+										</Select>
+									</FormControl>
+								</Grid>
 								<Grid item></Grid>
 							</Grid>
 						)}
@@ -239,7 +280,7 @@ export function UserPage() {
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{data.map((row) => {
+							{usersData.map((row) => {
 								return (
 									<TableRow
 										hover
@@ -250,7 +291,7 @@ export function UserPage() {
 										<TableCell align="center">{row.email}</TableCell>
 										<TableCell align="center">{row.firstName}</TableCell>
 										<TableCell align="center">{row.lastName}</TableCell>
-										<TableCell align="center">{row.role.name}</TableCell>
+										<TableCell align="center">{(row.role as RoleData).name}</TableCell>
 										<TableCell align="center">{row.department?.name ?? "Unassigned"}</TableCell>
 										<TableCell align="center">
 											<IconButton onClick={() => performOpenModal("edit", row)}>
