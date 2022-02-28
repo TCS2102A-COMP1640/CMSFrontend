@@ -56,8 +56,7 @@ interface Captions {
 
 export function YearPage() {
 	const dispatch = useAppDispatch();
-	const { data, status: getStatus } = useSelector((state: RootState) => state.years.getYears);
-	const { status: createStatus } = useSelector((state: RootState) => state.years.createYear);
+	const { data } = useSelector((state: RootState) => state.years.getYears);
 	const [mode, setMode] = useState<"create" | "edit" | "delete">("create");
 	const [openModal, setOpenModal] = useState(false);
 	const [formModal, setFormModal] = useState<Partial<YearData>>({});

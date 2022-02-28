@@ -1,12 +1,13 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
+import { pushMessage } from "@app/redux";
 import { IdeaResponseData, IdeaCommentData, IdeaData, GetIdeasPayload } from "./interfaces";
 import { parseISO } from "date-fns";
 import _ from "lodash";
 
 export const getIdeas = createAsyncThunk<IdeaResponseData, GetIdeasPayload>(
 	"ideas/getIdeas",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
@@ -31,7 +32,7 @@ export const getIdeas = createAsyncThunk<IdeaResponseData, GetIdeasPayload>(
 
 export const getIdeaComments = createAsyncThunk<IdeaCommentData[], { id: number }>(
 	"ideas/getIdeaComments",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
@@ -49,13 +50,14 @@ export const getIdeaComments = createAsyncThunk<IdeaCommentData[], { id: number 
 				};
 			});
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );
 
 export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
 	"ideas/createIdea",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
@@ -80,8 +82,10 @@ export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
 			token
 		});
 		if (_.isNil(error)) {
+			dispatch(pushMessage({ message: "New idea posted!", severity: "success" }));
 			return data;
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );
@@ -89,7 +93,7 @@ export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
 export const createIdeaComment = createAsyncThunk<
 	IdeaCommentData,
 	Pick<IdeaCommentData, "id" | "content"> & { academicYear: number }
->("ideas/createIdeaComment", async (payload, { rejectWithValue, getState }) => {
+>("ideas/createIdeaComment", async (payload, { rejectWithValue, getState, dispatch }) => {
 	const {
 		auth: { token }
 	} = getState();
@@ -105,8 +109,10 @@ export const createIdeaComment = createAsyncThunk<
 	});
 
 	if (_.isNil(error)) {
+		dispatch(pushMessage({ message: "New comment posted!", severity: "success" }));
 		return data;
 	}
+	dispatch(pushMessage({ message: error.message, severity: "error" }));
 
 	return rejectWithValue(error);
 });

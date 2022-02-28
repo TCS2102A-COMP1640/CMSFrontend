@@ -179,7 +179,7 @@ function IdeaInternal(props: IdeaProps) {
 								return (
 									<Grid item justifyContent="left">
 										<Typography textAlign="left" variant="subtitle2" fontWeight={600}>
-											{comment.user.department?.name ?? "Unknown"}
+											{comment.user.department?.name ?? "Unassigned"}
 										</Typography>
 										<Typography textAlign="left" variant="body2">
 											{comment.content}

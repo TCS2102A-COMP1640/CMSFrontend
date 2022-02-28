@@ -6,7 +6,9 @@ export const APIPaths = {
 	Auth: `${APIBase}/auth`,
 	Ideas: `${APIBase}/ideas`,
 	Categories: `${APIBase}/categories`,
-	Years: `${APIBase}/years`
+	Years: `${APIBase}/years`,
+	Users: `${APIBase}/users`,
+	Roles: `${APIBase}/roles`
 };
 
 export type Status = "idle" | "pending";
@@ -83,19 +85,23 @@ export async function fetchHandler(p: FetchParams) {
 		clearTimeout(timeoutId);
 		if (response.status >= 300) {
 			throw {
-				statusCode: response.status
+				statusCode: response.status,
+				statusMessage: (await response.json()).message
 			};
 		}
 		return {
 			status: response.status,
-			data: response.status >= 200 && response.status <= 206 ? await response.json() : {}
+			data: response.headers.get("content-type")?.indexOf("application/json") !== -1 ? await response.json() : {}
 		};
 	} catch (error) {
 		console.error(error);
 		return {
 			status: _.get(error, "statusCode", 500),
 			data: {},
-			error: error instanceof Error ? error : new Error("Something wrong happened. Please try again later.")
+			error:
+				error instanceof Error
+					? error
+					: new Error(_.get(error, "statusMessage", "Something wrong happened. Please try again later."))
 		};
 	}
 }

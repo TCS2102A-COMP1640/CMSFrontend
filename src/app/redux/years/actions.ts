@@ -1,12 +1,13 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
+import { pushMessage } from "@app/redux";
 import { YearData, YearResponseData } from "./interfaces";
 import { parseISO } from "date-fns";
 import _ from "lodash";
 
 export const getYears = createAsyncThunk<YearData[]>(
 	"years/getYears",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
@@ -23,13 +24,14 @@ export const getYears = createAsyncThunk<YearData[]>(
 				};
 			});
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );
 
 export const createYear = createAsyncThunk<YearData, Omit<YearData, "id">>(
 	"years/createYear",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
@@ -40,6 +42,7 @@ export const createYear = createAsyncThunk<YearData, Omit<YearData, "id">>(
 			token
 		});
 		if (_.isNil(error)) {
+			dispatch(pushMessage({ message: "Academic year created", severity: "success" }));
 			return {
 				...data,
 				openingDate: parseISO(data.openingDate),
@@ -47,13 +50,14 @@ export const createYear = createAsyncThunk<YearData, Omit<YearData, "id">>(
 				finalClosureDate: parseISO(data.finalClosureDate)
 			};
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );
 
 export const editYear = createAsyncThunk<YearData, Partial<YearData>>(
 	"years/editYear",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const { auth } = getState();
 		const { data, error } = <{ data: YearResponseData; error?: Error }>await fetchHandler({
 			path: `${APIPaths.Years}/:id`,
@@ -65,6 +69,7 @@ export const editYear = createAsyncThunk<YearData, Partial<YearData>>(
 			token: auth.token
 		});
 		if (_.isNil(error)) {
+			dispatch(pushMessage({ message: "Academic year edited", severity: "success" }));
 			return {
 				...data,
 				openingDate: parseISO(data.openingDate),
@@ -72,13 +77,14 @@ export const editYear = createAsyncThunk<YearData, Partial<YearData>>(
 				finalClosureDate: parseISO(data.finalClosureDate)
 			};
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );
 
 export const deleteYear = createAsyncThunk<void, Pick<YearData, "id">>(
 	"years/deleteYear",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const { auth } = getState();
 		const { error } = await fetchHandler({
 			path: `${APIPaths.Years}/:id`,
@@ -87,8 +93,10 @@ export const deleteYear = createAsyncThunk<void, Pick<YearData, "id">>(
 			token: auth.token
 		});
 		if (_.isNil(error)) {
+			dispatch(pushMessage({ message: "Academic year deleted", severity: "success" }));
 			return;
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );

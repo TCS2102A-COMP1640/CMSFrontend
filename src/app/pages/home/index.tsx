@@ -63,7 +63,7 @@ export function HomePage() {
 	const dispatch = useDispatch();
 	const { token } = useSelector((state: RootState) => state.auth);
 	const [openDrawer, setOpenDrawer] = useState(false);
-	const [selectedItem, setSelectedItem] = useState(menuItems[1].name);
+	const [selectedItem, setSelectedItem] = useState(menuItems[5].name);
 	const mediaQueries = {
 		sm: useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"))
 	};

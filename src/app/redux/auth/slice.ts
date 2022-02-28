@@ -38,4 +38,4 @@ const authSlice = createSlice({
 });
 const authReducer = authSlice.reducer;
 
-export { authReducer, loginToAccount, logoutFromAccount };
+export { authReducer };

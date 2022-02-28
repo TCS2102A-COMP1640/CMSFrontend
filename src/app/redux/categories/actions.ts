@@ -1,11 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
+import { pushMessage } from "@app/redux";
 import { CategoryData } from "./interfaces";
 import _ from "lodash";
 
 export const getCategories = createAsyncThunk<CategoryData[]>(
 	"categories/getCategories",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
@@ -15,13 +16,14 @@ export const getCategories = createAsyncThunk<CategoryData[]>(
 		if (_.isNil(error)) {
 			return data;
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );
 
 export const createCategory = createAsyncThunk<CategoryData, Omit<CategoryData, "id">>(
 	"categories/createCategory",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
@@ -32,15 +34,17 @@ export const createCategory = createAsyncThunk<CategoryData, Omit<CategoryData, 
 			token
 		});
 		if (_.isNil(error)) {
+			dispatch(pushMessage({ message: "Category created", severity: "success" }));
 			return data;
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );
 
 export const editCategory = createAsyncThunk<CategoryData, Partial<CategoryData>>(
 	"categories/editCategory",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
@@ -54,15 +58,17 @@ export const editCategory = createAsyncThunk<CategoryData, Partial<CategoryData>
 			token
 		});
 		if (_.isNil(error)) {
+			dispatch(pushMessage({ message: "Category edited", severity: "success" }));
 			return data;
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );
 
 export const deleteCategory = createAsyncThunk<void, Pick<CategoryData, "id">>(
 	"categories/deleteCategory",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
@@ -73,8 +79,10 @@ export const deleteCategory = createAsyncThunk<void, Pick<CategoryData, "id">>(
 			token
 		});
 		if (_.isNil(error)) {
+			dispatch(pushMessage({ message: "Category deleted", severity: "success" }));
 			return;
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );
