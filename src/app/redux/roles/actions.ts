@@ -1,11 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
+import { pushMessage } from "@app/redux";
 import { RoleData } from "./interfaces";
 import _ from "lodash";
 
 export const getRoles = createAsyncThunk<RoleData[]>(
 	"roles/getRoles",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
@@ -15,13 +16,14 @@ export const getRoles = createAsyncThunk<RoleData[]>(
 		if (_.isNil(error)) {
 			return data;
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );
 
 export const createRole = createAsyncThunk<RoleData, Omit<RoleData, "id">>(
 	"roles/createRole",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
@@ -32,15 +34,17 @@ export const createRole = createAsyncThunk<RoleData, Omit<RoleData, "id">>(
 			token
 		});
 		if (_.isNil(error)) {
+			dispatch(pushMessage({ message: "Role created", severity: "success" }));
 			return data;
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );
 
 export const editRole = createAsyncThunk<RoleData, Partial<RoleData>>(
 	"roles/editRole",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const { auth } = getState();
 		const { data, error } = <{ data: RoleData; error?: Error }>await fetchHandler({
 			path: `${APIPaths.Roles}/:id`,
@@ -52,15 +56,17 @@ export const editRole = createAsyncThunk<RoleData, Partial<RoleData>>(
 			token: auth.token
 		});
 		if (_.isNil(error)) {
+			dispatch(pushMessage({ message: "Role edited", severity: "success" }));
 			return data;
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );
 
 export const deleteRole = createAsyncThunk<void, Pick<RoleData, "id">>(
 	"roles/deleteRole",
-	async (payload, { rejectWithValue, getState }) => {
+	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const { auth } = getState();
 		const { error } = await fetchHandler({
 			path: `${APIPaths.Roles}/:id`,
@@ -69,8 +75,10 @@ export const deleteRole = createAsyncThunk<void, Pick<RoleData, "id">>(
 			token: auth.token
 		});
 		if (_.isNil(error)) {
+			dispatch(pushMessage({ message: "Role deleted", severity: "success" }));
 			return;
 		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
 	}
 );

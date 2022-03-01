@@ -1,5 +1,5 @@
 import { Status } from "@app/utils";
-import { RoleData } from "@app/redux";
+import { RoleData, DepartmentData } from "@app/redux";
 
 export interface UserData {
 	id: number;
@@ -8,10 +8,7 @@ export interface UserData {
 	firstName: string;
 	lastName: string;
 	role: number | RoleData;
-	department?: {
-		id: number;
-		name: string;
-	};
+	department?: number | DepartmentData;
 }
 
 export interface UsersState {

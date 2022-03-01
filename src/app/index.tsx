@@ -15,7 +15,8 @@ import {
 	CategoryPage,
 	YearPage,
 	DepartmentPage,
-	UserPage
+	UserPage,
+	RolePage
 } from "@app/pages";
 import { Store, StorePersistor, RootState, popMessage } from "@app/redux";
 import { AuthRequired } from "@app/components";
@@ -70,6 +71,7 @@ export function App() {
 											<Route path="/year" element={<YearPage />} />
 											<Route path="/department" element={<DepartmentPage />} />
 											<Route path="/user" element={<UserPage />} />
+											<Route path="/role" element={<RolePage />} />
 										</Route>
 									</Route>
 								</Routes>

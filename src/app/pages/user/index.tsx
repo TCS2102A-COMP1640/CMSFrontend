@@ -22,7 +22,8 @@ import {
 	FormControl,
 	Select,
 	MenuItem,
-	InputLabel
+	InputLabel,
+	FormHelperText
 } from "@mui/material";
 import { AddCircleOutlined, EditOutlined, DeleteOutlined, CancelOutlined } from "@mui/icons-material";
 import {
@@ -34,7 +35,9 @@ import {
 	editUser,
 	deleteUser,
 	getRoles,
-	RoleData
+	getDepartments,
+	RoleData,
+	DepartmentData
 } from "@app/redux";
 import _ from "lodash";
 
@@ -74,6 +77,7 @@ export function UserPage() {
 	const dispatch = useAppDispatch();
 	const { data: usersData } = useSelector((state: RootState) => state.users.getUsers);
 	const { data: rolesData } = useSelector((state: RootState) => state.roles.getRoles);
+	const { data: departmentsData } = useSelector((state: RootState) => state.departments.getDepartments);
 	const [mode, setMode] = useState<"create" | "edit" | "delete">("create");
 	const [openModal, setOpenModal] = useState(false);
 	const [formModal, setFormModal] = useState<Partial<UserData>>({});
@@ -82,14 +86,31 @@ export function UserPage() {
 	useEffect(() => {
 		dispatch(getUsers());
 		dispatch(getRoles());
+		dispatch(getDepartments());
 	}, []);
 
 	const validate = () => {
 		const captions: Captions = {};
 
-		// if (_.isEmpty(formModal.name)) {
-		// 	captions.name = "Please enter a valid name";
-		// }
+		if (_.isEmpty(formModal.email)) {
+			captions.email = "Please enter a name";
+		}
+
+		if (_.isEmpty(formModal.password) && mode === "create") {
+			captions.password = "Please enter a valid password";
+		}
+
+		if (_.isEmpty(formModal.firstName)) {
+			captions.firstName = "Please enter your first name";
+		}
+
+		if (_.isEmpty(formModal.lastName)) {
+			captions.lastName = "Please enter your last name";
+		}
+
+		if (_.isUndefined(formModal.role)) {
+			captions.role = "Please choose a role";
+		}
 
 		setCaptionsModal(captions);
 
@@ -98,7 +119,11 @@ export function UserPage() {
 
 	const performOpenModal = (mode: "create" | "edit" | "delete", row: Partial<UserData>) => {
 		setMode(mode);
-		setFormModal(row);
+		setFormModal({
+			...row,
+			role: _.get(row, ["role", "id"], undefined),
+			department: _.get(row, ["department", "id"], undefined)
+		});
 		setOpenModal(true);
 	};
 	const performCloseModal = () => {
@@ -156,20 +181,19 @@ export function UserPage() {
 										label="Last name"
 									/>
 								</Grid>
-								{mode === "create" && (
-									<Grid item>
-										<TextField
-											fullWidth
-											value={formModal.password}
-											onChange={(e) => setFormModal({ ...formModal, password: e.target.value })}
-											error={!_.isUndefined(captionsModal?.password) ? true : false}
-											helperText={captionsModal?.password}
-											label="Password"
-										/>
-									</Grid>
-								)}
 								<Grid item>
-									<FormControl sx={{ minWidth: 80 }}>
+									<TextField
+										fullWidth
+										type="password"
+										value={formModal.password}
+										onChange={(e) => setFormModal({ ...formModal, password: e.target.value })}
+										error={!_.isUndefined(captionsModal?.password) ? true : false}
+										helperText={captionsModal?.password}
+										label="Password"
+									/>
+								</Grid>
+								<Grid item>
+									<FormControl fullWidth>
 										<InputLabel
 											id="select-role-label"
 											sx={{
@@ -185,6 +209,7 @@ export function UserPage() {
 											labelId="select-role-label"
 											label="Role"
 											value={formModal.role}
+											error={!_.isUndefined(captionsModal?.role) ? true : false}
 											onChange={(e) =>
 												setFormModal({ ...formModal, role: e.target.value as number })
 											}
@@ -200,9 +225,44 @@ export function UserPage() {
 												);
 											})}
 										</Select>
+										<FormHelperText error={!_.isUndefined(captionsModal?.role) ? true : false}>
+											{captionsModal?.role}
+										</FormHelperText>
 									</FormControl>
 								</Grid>
-								<Grid item></Grid>
+								<Grid item>
+									<FormControl fullWidth>
+										<InputLabel id="select-department-label">Department</InputLabel>
+										<Select
+											labelId="select-department-label"
+											label="Department"
+											value={_.isUndefined(formModal.department) ? -1 : formModal.department}
+											onChange={(e) =>
+												setFormModal({
+													...formModal,
+													department:
+														(e.target.value as number) === -1
+															? undefined
+															: (e.target.value as number)
+												})
+											}
+											sx={{
+												height: 36
+											}}
+										>
+											<MenuItem key={-1} value={-1}>
+												Unassigned
+											</MenuItem>
+											{departmentsData.map((department) => {
+												return (
+													<MenuItem key={department.id} value={department.id}>
+														{department.name}
+													</MenuItem>
+												);
+											})}
+										</Select>
+									</FormControl>
+								</Grid>
 							</Grid>
 						)}
 					</CardContent>
@@ -220,7 +280,9 @@ export function UserPage() {
 										}
 										return;
 									case "edit":
-										dispatch(editUser(formModal)).then(() => dispatch(getUsers()));
+										if (validate()) {
+											dispatch(editUser(formModal)).then(() => dispatch(getUsers()));
+										}
 										break;
 									case "delete":
 										dispatch(deleteUser({ id: formModal.id as number })).then(() =>
@@ -292,7 +354,9 @@ export function UserPage() {
 										<TableCell align="center">{row.firstName}</TableCell>
 										<TableCell align="center">{row.lastName}</TableCell>
 										<TableCell align="center">{(row.role as RoleData).name}</TableCell>
-										<TableCell align="center">{row.department?.name ?? "Unassigned"}</TableCell>
+										<TableCell align="center">
+											{(row.department as DepartmentData)?.name ?? "Unassigned"}
+										</TableCell>
 										<TableCell align="center">
 											<IconButton onClick={() => performOpenModal("edit", row)}>
 												<EditOutlined />

@@ -23,7 +23,8 @@ import {
 	TagOutlined,
 	CalendarTodayOutlined,
 	CorporateFareOutlined,
-	PersonOutlined
+	PersonOutlined,
+	GroupOutlined
 } from "@mui/icons-material";
 import { logoutFromAccount, RootState, resetAuthState } from "@app/redux";
 import { isTokenExpired } from "@app/utils";
@@ -54,6 +55,10 @@ const menuItems = [
 	{
 		name: "User",
 		icon: <PersonOutlined />
+	},
+	{
+		name: "Role",
+		icon: <GroupOutlined />
 	}
 ];
 
@@ -63,7 +68,7 @@ export function HomePage() {
 	const dispatch = useDispatch();
 	const { token } = useSelector((state: RootState) => state.auth);
 	const [openDrawer, setOpenDrawer] = useState(false);
-	const [selectedItem, setSelectedItem] = useState(menuItems[5].name);
+	const [selectedItem, setSelectedItem] = useState(menuItems[6].name);
 	const mediaQueries = {
 		sm: useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"))
 	};

@@ -7,6 +7,8 @@ import { yearsReducer } from "./years";
 import { usersReducer } from "./users";
 import { rolesReducer } from "./roles";
 import { messagesReducer } from "./messages";
+import { departmentsReducer } from "./departments";
+import { permissionsReducer } from "./permissions";
 import storage from "redux-persist/lib/storage";
 import thunk from "redux-thunk";
 
@@ -21,7 +23,9 @@ export const Store = configureStore({
 		categories: categoriesReducer,
 		users: usersReducer,
 		roles: rolesReducer,
-		messages: messagesReducer
+		departments: departmentsReducer,
+		messages: messagesReducer,
+		permissions: permissionsReducer
 	},
 	middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(thunk).concat()
 });

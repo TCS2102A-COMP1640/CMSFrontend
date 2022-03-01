@@ -1,7 +1,7 @@
 export interface MessageData {
 	id: string;
 	message: string;
-	severity: "success" | "error";
+	severity: "success" | "error" | "info";
 }
 
 export interface MessagesState {

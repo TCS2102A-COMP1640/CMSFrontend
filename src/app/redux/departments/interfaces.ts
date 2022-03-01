@@ -1,27 +1,25 @@
 import { Status } from "@app/utils";
-import { PermissionData } from "@app/redux";
 
-export interface RoleData {
+export interface DepartmentData {
 	id: number;
 	name: string;
-	permissions: number[] | PermissionData[];
 }
 
-export interface RolesState {
-	getRoles: {
-		data: RoleData[];
+export interface DepartmentsState {
+	getDepartments: {
+		data: DepartmentData[];
 		status: Status;
 		error?: Error;
 	};
-	createRole: {
+	createDepartment: {
 		status: Status;
 		error?: Error;
 	};
-	editRole: {
+	editDepartment: {
 		status: Status;
 		error?: Error;
 	};
-	deleteRole: {
+	deleteDepartment: {
 		status: Status;
 		error?: Error;
 	};

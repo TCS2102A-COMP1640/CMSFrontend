@@ -8,6 +8,8 @@ import { Store } from "./store";
 import { UsersState } from "./users";
 import { MessagesState } from "./messages";
 import { RolesState } from "./roles";
+import { DepartmentsState } from "./departments";
+import { PermissionsState } from "./permissions";
 
 export interface RootState {
 	auth: AuthState;
@@ -16,7 +18,9 @@ export interface RootState {
 	categories: CategoriesState;
 	users: UsersState;
 	roles: RolesState;
+	departments: DepartmentsState;
 	messages: MessagesState;
+	permissions: PermissionsState;
 }
 
 export type AppDispatch = typeof Store.dispatch;

@@ -245,8 +245,8 @@ export function IdeaPage() {
 							</InputLabel>
 							<Select
 								labelId="select-year-label"
-								value={formModal.academicYear}
 								label="Year"
+								value={formModal.academicYear}
 								onChange={(e) => setFormModal({ ...formModal, academicYear: e.target.value as number })}
 								sx={{
 									height: 36

@@ -8,7 +8,9 @@ export const APIPaths = {
 	Categories: `${APIBase}/categories`,
 	Years: `${APIBase}/years`,
 	Users: `${APIBase}/users`,
-	Roles: `${APIBase}/roles`
+	Roles: `${APIBase}/roles`,
+	Departments: `${APIBase}/departments`,
+	Permissions: `${APIBase}/permissions`
 };
 
 export type Status = "idle" | "pending";

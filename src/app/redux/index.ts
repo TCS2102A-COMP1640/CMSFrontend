@@ -6,4 +6,6 @@ export * from "./ideas";
 export * from "./years";
 export * from "./users";
 export * from "./roles";
+export * from "./departments";
 export * from "./messages";
+export * from "./permissions";

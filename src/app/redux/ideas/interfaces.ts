@@ -1,5 +1,5 @@
 import { Status } from "@app/utils";
-import { CategoryData, YearData } from "@app/redux";
+import { CategoryData, YearData, DepartmentData } from "@app/redux";
 
 export interface GetIdeasPayload {
 	page: number;
@@ -19,9 +19,7 @@ export interface IdeaCommentData {
 	createTimestamp: string | Date;
 	user: {
 		id: number;
-		department?: {
-			name: string;
-		};
+		department?: DepartmentData;
 	};
 }
 
@@ -30,9 +28,7 @@ export interface IdeaData {
 	content: string;
 	user: {
 		id: number;
-		department?: {
-			name: string;
-		};
+		department?: DepartmentData;
 	};
 	categories: number[] | CategoryData[];
 	reactions: {

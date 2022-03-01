@@ -238,7 +238,9 @@ export function YearPage() {
 										}
 										return;
 									case "edit":
-										dispatch(editYear(formModal)).then(() => dispatch(getYears()));
+										if (validate()) {
+											dispatch(editYear(formModal)).then(() => dispatch(getYears()));
+										}
 										break;
 									case "delete":
 										dispatch(deleteYear({ id: formModal.id as number })).then(() =>
