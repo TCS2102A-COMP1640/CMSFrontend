@@ -23,20 +23,7 @@ import {
 	Divider
 } from "@mui/material";
 import { SendOutlined, CancelOutlined } from "@mui/icons-material";
-import {
-	RootState,
-	IdeaData,
-	CategoryData,
-	getIdeas,
-	useAppDispatch,
-	getYears,
-	createIdea,
-	getCategories,
-	IdeaDocumentData,
-	createIdeaComment,
-	IdeaCommentData,
-	getIdeaComments
-} from "@app/redux";
+import { RootState, IdeaData, getIdeas, useAppDispatch, getYears, createIdea, getCategories } from "@app/redux";
 import { Idea } from "@app/components";
 import _ from "lodash";
 
@@ -300,12 +287,8 @@ export function IdeaPage() {
 					return (
 						<Grid item>
 							<Idea
-								department={idea.user.department?.name || "Unknown"}
-								content={idea.content}
-								categories={idea.categories as CategoryData[]}
-								documents={idea.documents as IdeaDocumentData[]}
-								createTimestamp={idea.createTimestamp as Date}
-								defaultReaction="none"
+								idea={idea}
+								academicYear={formModal.academicYear as number}
 								disableComment={
 									_.isUndefined(formModal.academicYear)
 										? true
@@ -324,32 +307,6 @@ export function IdeaPage() {
 												return true;
 										  })()
 								}
-								onReactionChange={(reaction) => {
-									console.log(reaction);
-								}}
-								onLoadComments={(callback) => {
-									callback("pending", []);
-									dispatch(getIdeaComments({ id: idea.id })).then((data) => {
-										callback(
-											"idle",
-											data.meta.requestStatus === "fulfilled"
-												? (data.payload as IdeaCommentData[])
-												: []
-										);
-									});
-								}}
-								onSubmitComment={(comment, callback) => {
-									callback("pending");
-									dispatch(
-										createIdeaComment({
-											id: idea.id,
-											academicYear: formModal.academicYear as number,
-											content: comment
-										})
-									).then(() => {
-										callback("idle");
-									});
-								}}
 							/>
 						</Grid>
 					);

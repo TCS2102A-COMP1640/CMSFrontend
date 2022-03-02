@@ -1,7 +1,14 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
 import { pushMessage } from "@app/redux";
-import { IdeaResponseData, IdeaCommentData, IdeaData, GetIdeasPayload } from "./interfaces";
+import {
+	IdeaResponseData,
+	IdeaCommentData,
+	IdeaReactionData,
+	IdeaViewData,
+	IdeaData,
+	GetIdeasPayload
+} from "./interfaces";
 import { parseISO } from "date-fns";
 import _ from "lodash";
 
@@ -49,6 +56,26 @@ export const getIdeaComments = createAsyncThunk<IdeaCommentData[], { id: number 
 					createTimestamp: parseISO(comment.createTimestamp as string)
 				};
 			});
+		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
+		return rejectWithValue(error);
+	}
+);
+
+export const getIdeaReaction = createAsyncThunk<IdeaReactionData, { id: number }>(
+	"ideas/getIdeaReaction",
+	async (payload, { rejectWithValue, getState, dispatch }) => {
+		const {
+			auth: { token }
+		} = getState();
+		const { data, error } = <{ data: IdeaReactionData; error?: Error }>await fetchHandler({
+			path: `${APIPaths.Ideas}/:id/reactions`,
+			method: "GET",
+			params: payload,
+			token
+		});
+		if (_.isNil(error)) {
+			return data;
 		}
 		dispatch(pushMessage({ message: error.message, severity: "error" }));
 		return rejectWithValue(error);
@@ -116,3 +143,52 @@ export const createIdeaComment = createAsyncThunk<
 
 	return rejectWithValue(error);
 });
+
+export const createIdeaReaction = createAsyncThunk<IdeaReactionData, IdeaReactionData & { id: number }>(
+	"ideas/createIdeaReaction",
+	async (payload, { rejectWithValue, getState, dispatch }) => {
+		const {
+			auth: { token }
+		} = getState();
+
+		const { data, error } = <{ data: IdeaReactionData; error?: Error }>await fetchHandler({
+			path: `${APIPaths.Ideas}/:id/reactions`,
+			method: "POST",
+			body: _.omit(payload, "id"),
+			params: {
+				id: payload.id
+			},
+			token
+		});
+
+		if (_.isNil(error)) {
+			return data;
+		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
+
+		return rejectWithValue(error);
+	}
+);
+
+export const createIdeaView = createAsyncThunk<IdeaViewData, { id: number }>(
+	"ideas/createIdeaView",
+	async (payload, { rejectWithValue, getState, dispatch }) => {
+		const {
+			auth: { token }
+		} = getState();
+
+		const { data, error } = <{ data: IdeaViewData; error?: Error }>await fetchHandler({
+			path: `${APIPaths.Ideas}/:id/views`,
+			method: "POST",
+			params: payload,
+			token
+		});
+
+		if (_.isNil(error)) {
+			return data;
+		}
+		dispatch(pushMessage({ message: error.message, severity: "error" }));
+
+		return rejectWithValue(error);
+	}
+);

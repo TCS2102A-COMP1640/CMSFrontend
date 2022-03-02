@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, memo } from "react";
+import React, { useState, useEffect, memo, useRef } from "react";
 import {
 	Typography,
 	CircularProgress,
@@ -15,48 +15,90 @@ import {
 	Tooltip
 } from "@mui/material";
 import { ThumbUp, ThumbDown, Comment, ExpandMore, SendOutlined } from "@mui/icons-material";
-import { Status } from "@app/utils";
-import { CategoryData, IdeaCommentData, IdeaDocumentData } from "@app/redux";
+import {
+	getIdeaComments,
+	CategoryData,
+	getIdeaReaction,
+	IdeaCommentData,
+	IdeaData,
+	IdeaDocumentData,
+	useAppDispatch,
+	IdeaReactionData,
+	createIdeaComment,
+	createIdeaReaction,
+	createIdeaView
+} from "@app/redux";
 import { format } from "date-fns";
 import _ from "lodash";
 
-type IdeaReactionTypes = "up" | "down" | "none";
-
 export interface IdeaProps {
-	department: string;
-	content: string;
-	categories: CategoryData[];
-	documents: IdeaDocumentData[];
-	createTimestamp: Date;
-	defaultReaction: IdeaReactionTypes;
+	idea: IdeaData;
+	academicYear: number;
 	disableComment?: boolean;
-	onReactionChange?: (reaction: IdeaReactionTypes) => void;
-	onLoadComments?: (callback: (status: Status, data: IdeaCommentData[]) => void) => void;
-	onSubmitComment?: (comment: string, callback: (status: Status) => void) => void;
 }
 
 function IdeaInternal(props: IdeaProps) {
-	const { department, content, categories, documents, disableComment, createTimestamp, defaultReaction } = props;
-	const [reaction, setReaction] = useState(defaultReaction);
+	const dispatch = useAppDispatch();
+	const {
+		idea: {
+			id,
+			user: { department },
+			content,
+			categories,
+			documents,
+			createTimestamp
+		},
+		academicYear,
+		disableComment
+	} = props;
+
+	const [reaction, setReaction] = useState<number>(0);
 	const [comments, setComments] = useState<IdeaCommentData[]>([]);
+
+	const isInitialMount = useRef(true);
 	const [inputComment, setInputComment] = useState("");
 	const [openComments, setOpenComments] = useState(false);
 	const [loadingComments, setLoadingComments] = useState(false);
-	const isInitialMount = useRef(true);
+
 	const mediaQueries = {
 		sm: useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"))
+	};
+
+	const getComments = () => {
+		setLoadingComments(true);
+		dispatch(getIdeaComments({ id })).then((data) => {
+			if (data.meta.requestStatus === "fulfilled") {
+				setComments(data.payload as IdeaCommentData[]);
+			}
+			setLoadingComments(false);
+		});
+	};
+
+	const getReaction = () => {
+		dispatch(getIdeaReaction({ id })).then((data) => {
+			if (data.meta.requestStatus === "fulfilled") {
+				setReaction((data.payload as IdeaReactionData).type);
+			}
+		});
 	};
 
 	useEffect(() => {
 		if (isInitialMount.current) {
 			isInitialMount.current = false;
+			getReaction();
 		} else {
-			_.invoke(props, "onReactionChange", reaction);
+			dispatch(createIdeaReaction({ id, type: reaction })).then(getReaction);
 		}
 	}, [reaction]);
 
 	return (
-		<Accordion>
+		<Accordion
+			onChange={(e, expanded) => {
+				if (expanded) {
+					dispatch(createIdeaView({ id }));
+				}
+			}}
+		>
 			<AccordionSummary
 				sx={{
 					"& .MuiAccordionSummary-content": {
@@ -66,10 +108,10 @@ function IdeaInternal(props: IdeaProps) {
 				expandIcon={<ExpandMore />}
 			>
 				<Typography display="block" fontSize={18} variant={mediaQueries.sm ? "h5" : "h6"}>
-					{department}
+					{department?.name ?? "Unassigned"}
 				</Typography>
 				<Typography color="gray" variant="caption">
-					{format(createTimestamp, "dd/MM/yyyy hh:mm:ss")}
+					{format(createTimestamp as Date, "dd/MM/yyyy hh:mm:ss")}
 				</Typography>
 			</AccordionSummary>
 			<AccordionDetails>
@@ -82,14 +124,14 @@ function IdeaInternal(props: IdeaProps) {
 						{!_.isEmpty(categories) && (
 							<Stack direction="row" spacing={2}>
 								{categories.map((category) => (
-									<Chip sx={{ height: 24 }} label={category.name} />
+									<Chip sx={{ height: 24 }} label={(category as CategoryData).name} />
 								))}
 							</Stack>
 						)}
 						{!_.isEmpty(categories) && <br />}
 						{!_.isEmpty(documents) && (
 							<Stack direction="row" spacing={2}>
-								{documents.map((document) => (
+								{(documents as IdeaDocumentData[]).map((document) => (
 									<Tooltip title={document.name}>
 										<Chip clickable sx={{ height: 24, maxWidth: 120 }} label={document.name} />
 									</Tooltip>
@@ -100,29 +142,22 @@ function IdeaInternal(props: IdeaProps) {
 						<Stack direction="row" spacing={2}>
 							<IconButton
 								onClick={() => {
-									setReaction(reaction === "up" ? "none" : "up");
+									setReaction(reaction === 1 ? 0 : 1);
 								}}
 							>
-								<ThumbUp color={reaction === "up" ? "primary" : "inherit"} />
+								<ThumbUp color={reaction === 1 ? "primary" : "inherit"} />
 							</IconButton>
 							<IconButton
 								onClick={() => {
-									setReaction(reaction === "down" ? "none" : "down");
+									setReaction(reaction === 2 ? 0 : 2);
 								}}
 							>
-								<ThumbDown color={reaction === "down" ? "primary" : "inherit"} />
+								<ThumbDown color={reaction === 2 ? "primary" : "inherit"} />
 							</IconButton>
 							<IconButton
 								onClick={() => {
 									if (!openComments) {
-										_.invoke(
-											props,
-											"onLoadComments",
-											(status: Status, comments: IdeaCommentData[]) => {
-												setComments(comments);
-												setLoadingComments(status === "pending" ? true : false);
-											}
-										);
+										getComments();
 									}
 									setOpenComments(!openComments);
 								}}
@@ -157,18 +192,9 @@ function IdeaInternal(props: IdeaProps) {
 										disabled={disableComment}
 										sx={{ height: 33, width: 33 }}
 										onClick={() => {
-											_.invoke(props, "onSubmitComment", inputComment, (status: Status) => {
-												if (status === "idle") {
-													_.invoke(
-														props,
-														"onLoadComments",
-														(status: Status, comments: IdeaCommentData[]) => {
-															setComments(comments);
-															setLoadingComments(status === "pending" ? true : false);
-														}
-													);
-												}
-											});
+											dispatch(
+												createIdeaComment({ id, academicYear, content: inputComment })
+											).then(getComments);
 										}}
 									>
 										<SendOutlined fontSize="small" />

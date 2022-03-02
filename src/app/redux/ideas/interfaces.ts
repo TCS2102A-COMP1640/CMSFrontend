@@ -23,6 +23,10 @@ export interface IdeaCommentData {
 	};
 }
 
+export interface IdeaReactionData {
+	type: number;
+}
+
 export interface IdeaData {
 	id: number;
 	content: string;
@@ -31,10 +35,6 @@ export interface IdeaData {
 		department?: DepartmentData;
 	};
 	categories: number[] | CategoryData[];
-	reactions: {
-		id: number;
-		type: number;
-	}[];
 	views: {
 		id: number;
 	}[];
