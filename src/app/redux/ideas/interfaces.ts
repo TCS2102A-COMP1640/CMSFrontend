@@ -5,6 +5,7 @@ export interface GetIdeasPayload {
 	page: number;
 	pageLimit: number;
 	academicYear: number;
+	order?: "views" | "reactions" | "latest";
 }
 
 export interface IdeaDocumentData {
@@ -27,6 +28,11 @@ export interface IdeaReactionData {
 	type: number;
 }
 
+export interface IdeaViewData {
+	createTimestamp: string | Date;
+	updateTimestamp: string | Date;
+}
+
 export interface IdeaData {
 	id: number;
 	content: string;
@@ -35,9 +41,8 @@ export interface IdeaData {
 		department?: DepartmentData;
 	};
 	categories: number[] | CategoryData[];
-	views: {
-		id: number;
-	}[];
+	viewCount: number;
+	reactionScore: number;
 	documents: FileList | IdeaDocumentData[];
 	academicYear?: number | YearData;
 	createTimestamp: string | Date;

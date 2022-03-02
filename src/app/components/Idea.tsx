@@ -207,6 +207,9 @@ function IdeaInternal(props: IdeaProps) {
 										<Typography textAlign="left" variant="subtitle2" fontWeight={600}>
 											{comment.user.department?.name ?? "Unassigned"}
 										</Typography>
+										<Typography color="gray" fontSize={12} textAlign="left" variant="caption">
+											{format(comment.createTimestamp as Date, "dd/MM/yyyy hh:mm:ss")}
+										</Typography>
 										<Typography textAlign="left" variant="body2">
 											{comment.content}
 										</Typography>

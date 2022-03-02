@@ -64,7 +64,7 @@ export async function fetchHandler(p: FetchParams) {
 		for (const param in params) {
 			requestPath = requestPath.replace(`:${param}`, params[param].toString());
 		}
-		const requestQuery = !_.isNil(query) ? "?" + new URLSearchParams(query).toString() : "";
+		const requestQuery = !_.isNil(query) ? "?" + new URLSearchParams(_.pickBy(query, _.identity)).toString() : "";
 
 		const response = await fetch(`${requestPath}${requestQuery}`, {
 			method,

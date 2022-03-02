@@ -51,6 +51,7 @@ export function IdeaPage() {
 	const { data: yearsData } = useSelector((state: RootState) => state.years.getYears);
 	const { data: categoriesData } = useSelector((state: RootState) => state.categories.getCategories);
 	const [page, setPage] = useState(1);
+	const [order, setOrder] = useState<"views" | "reactions" | "latest" | undefined>(undefined);
 	const [openModal, setOpenModal] = useState(false);
 	const [formModal, setFormModal] = useState<Partial<IdeaData>>({});
 	const [captionsModal, setCaptionsModal] = useState<Captions>({});
@@ -81,10 +82,11 @@ export function IdeaPage() {
 			getIdeas({
 				page: page - 1,
 				pageLimit: itemSkeletons.length,
-				academicYear: formModal.academicYear as number
+				academicYear: formModal.academicYear as number,
+				order
 			})
 		);
-	}, [page, formModal.academicYear]);
+	}, [page, order, formModal.academicYear]);
 
 	return (
 		<Grid container direction="column" px={{ xs: 0, sm: 5, md: 15 }} spacing={2}>
@@ -246,6 +248,44 @@ export function IdeaPage() {
 										</MenuItem>
 									);
 								})}
+							</Select>
+						</FormControl>
+					</Grid>
+					<Grid item>
+						<FormControl sx={{ minWidth: 80 }}>
+							<InputLabel
+								id="select-filter-label"
+								sx={{
+									top: 0
+								}}
+							>
+								Filter
+							</InputLabel>
+							<Select
+								labelId="select-filter-label"
+								label="Filter"
+								value={_.isUndefined(order) ? "none" : order}
+								onChange={(e) =>
+									e.target.value === "none"
+										? setOrder(undefined)
+										: setOrder(e.target.value as keyof typeof order)
+								}
+								sx={{
+									height: 36
+								}}
+							>
+								<MenuItem key={-1} value={"none"}>
+									None
+								</MenuItem>
+								<MenuItem key={0} value={"latest"}>
+									Latest
+								</MenuItem>
+								<MenuItem key={1} value={"views"}>
+									Most viewed
+								</MenuItem>
+								<MenuItem key={2} value={"reactions"}>
+									Most popular
+								</MenuItem>
 							</Select>
 						</FormControl>
 					</Grid>
