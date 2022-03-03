@@ -20,12 +20,14 @@ import {
 	Box,
 	InputLabel,
 	FormControl,
-	Divider
+	Divider,
+	Stack
 } from "@mui/material";
 import { SendOutlined, CancelOutlined } from "@mui/icons-material";
 import { RootState, IdeaData, getIdeas, useAppDispatch, getYears, createIdea, getCategories } from "@app/redux";
 import { Idea } from "@app/components";
 import _ from "lodash";
+import { APIPaths } from "@app/utils";
 
 const itemSkeletons: JSX.Element[] = [];
 
@@ -48,6 +50,7 @@ export function IdeaPage() {
 		status: ideasStatus,
 		pages: ideasPages
 	} = useSelector((state: RootState) => state.ideas.getIdeas);
+	const { token } = useSelector((state: RootState) => state.auth);
 	const { data: yearsData } = useSelector((state: RootState) => state.years.getYears);
 	const { data: categoriesData } = useSelector((state: RootState) => state.categories.getCategories);
 	const [page, setPage] = useState(1);
@@ -188,6 +191,12 @@ export function IdeaPage() {
 								hidden
 							/>
 						</Button>
+						<Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+							{!_.isUndefined(formModal.documents) &&
+								Array.from(formModal.documents as FileList).map((file) => {
+									return <Chip sx={{ height: 24 }} label={file.name} />;
+								})}
+						</Stack>
 					</CardContent>
 					<CardActions>
 						<Button
@@ -288,6 +297,26 @@ export function IdeaPage() {
 								</MenuItem>
 							</Select>
 						</FormControl>
+					</Grid>
+					<Grid item>
+						<Button
+							disabled={_.isUndefined(formModal.academicYear)}
+							variant="outlined"
+							href={`${APIPaths.Ideas}/csv?academicYear=${formModal.academicYear}&token=${token}`}
+							download
+						>
+							Download CSV
+						</Button>
+					</Grid>
+					<Grid item>
+						<Button
+							disabled={_.isUndefined(formModal.academicYear)}
+							variant="outlined"
+							href={`${APIPaths.Ideas}/documents?academicYear=${formModal.academicYear}&token=${token}`}
+							download
+						>
+							Download Documents
+						</Button>
 					</Grid>
 					<Grid item flexGrow={1}></Grid>
 					<Grid item>
