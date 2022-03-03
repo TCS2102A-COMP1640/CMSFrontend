@@ -1,9 +1,11 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
 import { pushMessage } from "@app/redux";
 import { YearData, YearResponseData } from "./interfaces";
 import { parseISO } from "date-fns";
 import _ from "lodash";
+
+export const resetYearsState = createAction("years/reset");
 
 export const getYears = createAsyncThunk<YearData[]>(
 	"years/getYears",

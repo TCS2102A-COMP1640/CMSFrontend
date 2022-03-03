@@ -1,8 +1,10 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
 import { pushMessage } from "@app/redux";
 import { RoleData } from "./interfaces";
 import _ from "lodash";
+
+export const resetRolesState = createAction("roles/reset");
 
 export const getRoles = createAsyncThunk<RoleData[]>(
 	"roles/getRoles",

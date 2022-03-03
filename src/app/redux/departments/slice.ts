@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { DepartmentsState } from "./interfaces";
-import { getDepartments, createDepartment, editDepartment, deleteDepartment } from "./actions";
+import { getDepartments, createDepartment, editDepartment, deleteDepartment, resetDepartmentsState } from "./actions";
 import _ from "lodash";
 
 const departmentsState: DepartmentsState = {
@@ -65,6 +65,9 @@ const departmentsSlice = createSlice({
 			})
 			.addCase(deleteDepartment.fulfilled, (state, action) => {
 				state.deleteDepartment.status = "idle";
+			})
+			.addCase(resetDepartmentsState, (state, action) => {
+				return departmentsState;
 			});
 	}
 });

@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { UsersState } from "./interfaces";
-import { getUsers, createUser, editUser, deleteUser } from "./actions";
+import { getUsers, createUser, editUser, deleteUser, resetUsersState } from "./actions";
 import _ from "lodash";
 
 const usersState: UsersState = {
@@ -65,6 +65,9 @@ const usersSlice = createSlice({
 			})
 			.addCase(deleteUser.fulfilled, (state, action) => {
 				state.deleteUser.status = "idle";
+			})
+			.addCase(resetUsersState, (state, action) => {
+				return usersState;
 			});
 	}
 });

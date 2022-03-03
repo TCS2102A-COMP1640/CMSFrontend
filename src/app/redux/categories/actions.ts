@@ -1,8 +1,10 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
 import { pushMessage } from "@app/redux";
 import { CategoryData } from "./interfaces";
 import _ from "lodash";
+
+export const resetCategoriesState = createAction("categories/reset");
 
 export const getCategories = createAsyncThunk<CategoryData[]>(
 	"categories/getCategories",

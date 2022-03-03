@@ -1,8 +1,10 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
 import { pushMessage } from "@app/redux";
 import { PermissionData } from "./interfaces";
 import _ from "lodash";
+
+export const resetPermissionsState = createAction("permissions/reset");
 
 export const getPermissions = createAsyncThunk<PermissionData[]>(
 	"permissions/getPermissions",

@@ -1,8 +1,10 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
 import { UserData } from "./interfaces";
 import _ from "lodash";
 import { pushMessage } from "..";
+
+export const resetUsersState = createAction("users/reset");
 
 export const getUsers = createAsyncThunk<UserData[]>(
 	"users/getUsers",

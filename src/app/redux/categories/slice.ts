@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { CategoriesState } from "./interfaces";
-import { getCategories, createCategory, editCategory, deleteCategory } from "./actions";
+import { getCategories, createCategory, editCategory, deleteCategory, resetCategoriesState } from "./actions";
 import _ from "lodash";
 
 const categoriesState: CategoriesState = {
@@ -65,6 +65,9 @@ const categoriesSlice = createSlice({
 			})
 			.addCase(deleteCategory.fulfilled, (state, action) => {
 				state.deleteCategory.status = "idle";
+			})
+			.addCase(resetCategoriesState, (state, action) => {
+				return categoriesState;
 			});
 	}
 });

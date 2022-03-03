@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { IdeasState } from "./interfaces";
-import { getIdeas, createIdea } from "./actions";
+import { getIdeas, createIdea, resetIdeasState } from "./actions";
 import _ from "lodash";
 
 const ideasState: IdeasState = {
@@ -43,6 +43,9 @@ const ideasSlice = createSlice({
 			})
 			.addCase(createIdea.fulfilled, (state, action) => {
 				state.createIdea.status = "idle";
+			})
+			.addCase(resetIdeasState, (state, action) => {
+				return ideasState;
 			});
 	}
 });

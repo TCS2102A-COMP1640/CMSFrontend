@@ -1,4 +1,4 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
 import { pushMessage } from "@app/redux";
 import {
@@ -12,9 +12,11 @@ import {
 import { parseISO } from "date-fns";
 import _ from "lodash";
 
+export const resetIdeasState = createAction("ideas/reset");
+
 export const getIdeas = createAsyncThunk<IdeaResponseData, GetIdeasPayload>(
 	"ideas/getIdeas",
-	async (payload, { rejectWithValue, getState, dispatch }) => {
+	async (payload, { rejectWithValue, getState }) => {
 		const {
 			auth: { token }
 		} = getState();

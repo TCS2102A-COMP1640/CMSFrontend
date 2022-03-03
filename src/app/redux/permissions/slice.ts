@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PermissionsState } from "./interfaces";
-import { getPermissions } from "./actions";
+import { getPermissions, resetPermissionsState } from "./actions";
 import _ from "lodash";
 
 const permissionsState: PermissionsState = {
@@ -26,6 +26,9 @@ const permissionsSlice = createSlice({
 			.addCase(getPermissions.fulfilled, (state, action) => {
 				state.getPermissions.status = "idle";
 				state.getPermissions.data = action.payload;
+			})
+			.addCase(resetPermissionsState, (state, action) => {
+				return permissionsState;
 			});
 	}
 });

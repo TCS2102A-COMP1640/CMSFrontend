@@ -1,7 +1,9 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
 import { DepartmentData } from "./interfaces";
 import _ from "lodash";
+
+export const resetDepartmentsState = createAction("departments/reset");
 
 export const getDepartments = createAsyncThunk<DepartmentData[]>(
 	"departments/getDepartments",

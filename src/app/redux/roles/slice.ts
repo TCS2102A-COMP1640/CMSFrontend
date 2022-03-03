@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { RolesState } from "./interfaces";
-import { getRoles, createRole, editRole, deleteRole } from "./actions";
+import { getRoles, createRole, editRole, deleteRole, resetRolesState } from "./actions";
 import _ from "lodash";
 
 const rolesState: RolesState = {
@@ -65,6 +65,9 @@ const rolesSlice = createSlice({
 			})
 			.addCase(deleteRole.fulfilled, (state, action) => {
 				state.deleteRole.status = "idle";
+			})
+			.addCase(resetRolesState, (state, action) => {
+				return rolesState;
 			});
 	}
 });

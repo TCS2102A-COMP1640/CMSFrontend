@@ -26,7 +26,18 @@ import {
 	PersonOutlined,
 	GroupOutlined
 } from "@mui/icons-material";
-import { logoutFromAccount, RootState, resetAuthState } from "@app/redux";
+import {
+	logoutFromAccount,
+	RootState,
+	resetAuthState,
+	resetCategoriesState,
+	resetDepartmentsState,
+	resetIdeasState,
+	resetPermissionsState,
+	resetRolesState,
+	resetUsersState,
+	resetYearsState
+} from "@app/redux";
 import { isTokenExpired } from "@app/utils";
 import _ from "lodash";
 
@@ -68,13 +79,24 @@ export function HomePage() {
 	const dispatch = useDispatch();
 	const { token } = useSelector((state: RootState) => state.auth);
 	const [openDrawer, setOpenDrawer] = useState(false);
-	const [selectedItem, setSelectedItem] = useState(menuItems[6].name);
+	const [selectedItem, setSelectedItem] = useState(menuItems[0].name);
 	const mediaQueries = {
 		sm: useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"))
 	};
 
 	const toggleDrawer = () => {
 		setOpenDrawer(!openDrawer);
+	};
+
+	const resetStates = () => {
+		dispatch(resetAuthState());
+		dispatch(resetCategoriesState());
+		dispatch(resetDepartmentsState());
+		dispatch(resetIdeasState());
+		dispatch(resetPermissionsState());
+		dispatch(resetRolesState());
+		dispatch(resetUsersState());
+		dispatch(resetYearsState());
 	};
 
 	useEffect(() => {
@@ -86,7 +108,7 @@ export function HomePage() {
 
 	useEffect(() => {
 		if (isTokenExpired(token)) {
-			dispatch(resetAuthState());
+			resetStates();
 			navigate("/login");
 		}
 	}, [location]);
@@ -117,6 +139,7 @@ export function HomePage() {
 					<IconButton
 						onClick={() => {
 							dispatch(logoutFromAccount());
+							resetStates();
 							navigate("/login");
 						}}
 					>
