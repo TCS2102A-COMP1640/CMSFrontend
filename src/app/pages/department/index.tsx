@@ -1,26 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
-	Table,
 	TableHead,
-	TableBody,
-	TableCell,
-	TableRow,
 	TableContainer,
 	Paper,
 	Box,
 	Grid,
-	Toolbar,
-	Button,
-	IconButton,
 	Card,
-	TextField,
+	TablePagination,
 	CardContent,
 	CardActions,
 	Modal,
 	Typography
 } from "@mui/material";
-import { AddCircleOutlined, EditOutlined, DeleteOutlined, CancelOutlined } from "@mui/icons-material";
+import {
+	StyledTextField,
+	CreateButton,
+	EditButtonIcon,
+	DeleteButtonIcon,
+	StyledTable,
+	StyledTableBody,
+	StyledTableRow,
+	StyledTableCell,
+	DeleteButtonText,
+	CancelButtonText,
+	EditButtonText
+} from "@app/components";
 import {
 	RootState,
 	useAppDispatch,
@@ -37,10 +42,10 @@ const tableCells = [
 		label: "ID"
 	},
 	{
-		label: "Name Department"
+		label: "Name"
 	},
 	{
-		label: "Action"
+		label: "Actions"
 	}
 ];
 
@@ -50,15 +55,21 @@ interface Captions {
 
 export function DepartmentPage() {
 	const dispatch = useAppDispatch();
-	const { data } = useSelector((state: RootState) => state.departments.getDepartments);
+	const { data, status } = useSelector((state: RootState) => state.departments.getDepartments);
 	const [mode, setMode] = useState<"create" | "edit" | "delete">("create");
+	const [page, setPage] = useState(0);
+	const [rowsPerPage, setRowsPerPage] = useState(5);
 	const [openModal, setOpenModal] = useState(false);
 	const [formModal, setFormModal] = useState<Partial<DepartmentData>>({});
 	const [captionsModal, setCaptionsModal] = useState<Captions>();
 
+	const getDepartmentsPaginated = () => {
+		dispatch(getDepartments({ page, pageLimit: rowsPerPage }));
+	};
+
 	useEffect(() => {
-		dispatch(getDepartments());
-	}, []);
+		getDepartmentsPaginated();
+	}, [page, rowsPerPage]);
 
 	const validate = () => {
 		const captions: Captions = {};
@@ -84,8 +95,8 @@ export function DepartmentPage() {
 	};
 
 	return (
-		<Box px={{ sm: 0, md: 7 }}>
-			<Modal open={openModal} onClose={performCloseModal}>
+		<Box>
+			<Modal keepMounted={false} open={openModal} onClose={performCloseModal}>
 				<Card
 					sx={{
 						minWidth: { xs: 310, sm: 450 },
@@ -103,12 +114,13 @@ export function DepartmentPage() {
 						) : (
 							<Grid container direction="column" spacing={2}>
 								<Grid item>
-									<TextField
+									<StyledTextField
 										fullWidth
 										value={formModal.name}
 										onChange={(e) => setFormModal({ ...formModal, name: e.target.value })}
 										error={!_.isUndefined(captionsModal?.name) ? true : false}
 										helperText={captionsModal?.name}
+										placeholder="IT Department"
 										label="Name"
 									/>
 								</Grid>
@@ -116,102 +128,107 @@ export function DepartmentPage() {
 						)}
 					</CardContent>
 					<CardActions sx={{ justifyContent: "center" }}>
-						<Button
-							variant="outlined"
-							onClick={() => {
-								switch (mode) {
-									case "create":
-										if (validate()) {
-											dispatch(createDepartment(formModal as Omit<DepartmentData, "id">)).then(
-												() => dispatch(getDepartments())
-											);
-											performCloseModal();
-										}
-										return;
-									case "edit":
-										dispatch(editDepartment(formModal)).then(() => dispatch(getDepartments()));
-										break;
-									case "delete":
-										dispatch(deleteDepartment({ id: formModal.id as number })).then(() =>
-											dispatch(getDepartments())
+						{mode === "create" ? (
+							<CreateButton
+								size="medium"
+								onClick={() => {
+									if (validate()) {
+										dispatch(createDepartment(formModal as Omit<DepartmentData, "id">)).then(() =>
+											getDepartmentsPaginated()
 										);
-										break;
-								}
-								performCloseModal();
-							}}
-							endIcon={
-								mode === "create" ? (
-									<AddCircleOutlined />
-								) : mode === "edit" ? (
-									<EditOutlined />
-								) : (
-									<DeleteOutlined />
-								)
-							}
-						>
-							{mode === "create" ? "Create" : mode === "edit" ? "Edit" : "Delete"}
-						</Button>
-
-						<Button
-							variant="outlined"
+										performCloseModal();
+									}
+								}}
+							/>
+						) : mode === "edit" ? (
+							<EditButtonText
+								onClick={() => {
+									if (validate()) {
+										dispatch(editDepartment(formModal)).then(() => getDepartmentsPaginated());
+										performCloseModal();
+									}
+								}}
+							/>
+						) : (
+							<DeleteButtonText
+								onClick={() => {
+									dispatch(deleteDepartment({ id: formModal.id as number })).then(() =>
+										getDepartmentsPaginated()
+									);
+								}}
+							/>
+						)}
+						<Box width={20} />
+						<CancelButtonText
 							onClick={() => {
 								performCloseModal();
 							}}
-							endIcon={<CancelOutlined />}
-						>
-							Cancel
-						</Button>
+						/>
 					</CardActions>
 				</Card>
 			</Modal>
-			<Paper>
-				<Toolbar sx={{ alignContent: "center" }}>
-					<Button
-						fullWidth
-						onClick={() => performOpenModal("create", {})}
-						variant="outlined"
-						endIcon={<AddCircleOutlined />}
+			<Box py={4} display="flex">
+				<Box flexGrow={1} />
+				<CreateButton onClick={() => performOpenModal("create", {})} />
+			</Box>
+			<Paper
+				sx={{
+					boxShadow: "rgba(145, 158, 171, 0.25) 0px 0px 3px 0px, rgba(145, 158, 171, 0.12) 0px 12px 24px -4px"
+				}}
+			>
+				<TableContainer component={Paper} sx={{ boxShadow: "none" }}>
+					<StyledTable
+						overlay={status === "pending" ? "loading" : _.isEmpty(data) ? "empty" : "none"}
+						sx={{ minWidth: { md: 300 } }}
+						size="small"
 					>
-						Create
-					</Button>
-				</Toolbar>
-				<TableContainer component={Paper}>
-					<Table sx={{ minWidth: { md: 300 } }} size="small">
 						<TableHead>
-							<TableRow>
+							<StyledTableRow>
 								{tableCells.map((cell) => {
 									return (
-										<TableCell sx={{ fontWeight: 600 }} align="center" variant="head">
-											{cell.label}
-										</TableCell>
+										<StyledTableCell align="center" variant="head">
+											{cell.label.toUpperCase()}
+										</StyledTableCell>
 									);
 								})}
-							</TableRow>
+							</StyledTableRow>
 						</TableHead>
-						<TableBody>
+						<StyledTableBody loadingCellWidths={["10%", "60%", "15%"]}>
 							{data.map((row) => {
 								return (
-									<TableRow
-										hover
-										key={row.id}
-										sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-									>
-										<TableCell align="center">{row.id}</TableCell>
-										<TableCell align="center">{row.name}</TableCell>
-										<TableCell align="center">
-											<IconButton onClick={() => performOpenModal("edit", row)}>
-												<EditOutlined />
-											</IconButton>
-											<IconButton onClick={() => performOpenModal("delete", row)}>
-												<DeleteOutlined />
-											</IconButton>
-										</TableCell>
-									</TableRow>
+									<StyledTableRow key={row.id}>
+										<StyledTableCell sx={{ fontWeight: 500 }} align="center" width="10%">
+											{row.id}
+										</StyledTableCell>
+										<StyledTableCell align="center" width="60%">
+											{row.name}
+										</StyledTableCell>
+										<StyledTableCell align="center" width="15%">
+											<Box display="inline-block" p={0.5}>
+												<EditButtonIcon onClick={() => performOpenModal("edit", row)} />
+											</Box>
+											<Box display="inline-block" p={0.5}>
+												<DeleteButtonIcon onClick={() => performOpenModal("delete", row)} />
+											</Box>
+										</StyledTableCell>
+									</StyledTableRow>
 								);
 							})}
-						</TableBody>
-					</Table>
+						</StyledTableBody>
+					</StyledTable>
 				</TableContainer>
+				<TablePagination
+					rowsPerPageOptions={[5, 10, 25]}
+					component="div"
+					count={-1}
+					rowsPerPage={rowsPerPage}
+					page={page}
+					onPageChange={(e, page) => setPage(page)}
+					onRowsPerPageChange={(e) => {
+						setRowsPerPage(_.toInteger(e.target.value));
+						setPage(0);
+					}}
+				/>
 			</Paper>
 		</Box>
 	);

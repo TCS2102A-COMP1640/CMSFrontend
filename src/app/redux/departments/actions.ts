@@ -5,14 +5,14 @@ import _ from "lodash";
 
 export const resetDepartmentsState = createAction("departments/reset");
 
-export const getDepartments = createAsyncThunk<DepartmentData[]>(
+export const getDepartments = createAsyncThunk<DepartmentData[], { page: number; pageLimit: number }>(
 	"departments/getDepartments",
 	async (payload, { rejectWithValue, getState }) => {
 		const {
 			auth: { token }
 		} = getState();
 		const { data, error } = <{ data: DepartmentData[]; error?: Error }>(
-			await fetchHandler({ path: APIPaths.Departments, method: "GET", token })
+			await fetchHandler({ path: APIPaths.Departments, method: "GET", query: payload, token })
 		);
 		if (_.isNil(error)) {
 			return data;

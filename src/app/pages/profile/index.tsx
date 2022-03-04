@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Box, Paper, Typography } from "@mui/material";
-import { RootState, getProfile, RoleData } from "@app/redux";
+import { RootState, getProfile, RoleData, DepartmentData } from "@app/redux";
 import _ from "lodash";
 
 export function ProfilePage() {
@@ -20,7 +20,7 @@ export function ProfilePage() {
 				</Typography>
 				<Typography>Email: {profile?.email}</Typography>
 				<Typography>Role: {(profile?.role as RoleData)?.name}</Typography>
-				<Typography>Department: {profile?.department?.name ?? "Unassigned"} </Typography>
+				<Typography>Department: {(profile?.department as DepartmentData)?.name ?? "Unassigned"} </Typography>
 			</Paper>
 		</Box>
 	);

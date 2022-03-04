@@ -23,7 +23,38 @@ import { AuthRequired } from "@app/components";
 import { useSnackbar } from "notistack";
 import _ from "lodash";
 
-const Theme = createTheme();
+const Theme = createTheme({
+	typography: {
+		fontFamily: ["Roboto", "sans-serif"].join(","),
+		allVariants: {
+			color: "#212B36"
+		},
+		body1: {
+			fontSize: "0.95rem"
+		}
+	},
+	components: {
+		MuiTableCell: {
+			styleOverrides: {
+				root: ({ ownerState, theme }) => ({
+					...(ownerState.variant === "head" && {
+						fontSize: "0.9em",
+						letterSpacing: 0.75,
+						fontWeight: 600,
+						color: "rgb(55, 65, 81)"
+					})
+				})
+			}
+		},
+		MuiTablePagination: {
+			styleOverrides: {
+				root: ({ ownerState, theme }) => ({
+					borderTop: "1px solid rgba(224, 224, 224, 1)"
+				})
+			}
+		}
+	}
+});
 let displayedSnackbars: string[] = [];
 
 function AppNotifications() {

@@ -10,21 +10,23 @@ import {
 	ListItemButton,
 	ListItemText,
 	ListItemIcon,
+	ListSubheader,
 	Typography,
 	IconButton,
 	Theme,
-	useMediaQuery
+	useMediaQuery,
+	Breadcrumbs
 } from "@mui/material";
 import {
-	AccountBoxOutlined,
-	ArticleOutlined,
+	AccountBoxRounded,
+	ArticleRounded,
 	MenuOutlined,
 	LogoutRounded,
-	TagOutlined,
-	CalendarTodayOutlined,
-	CorporateFareOutlined,
-	PersonOutlined,
-	GroupOutlined
+	TagRounded,
+	CalendarTodayRounded,
+	CorporateFareRounded,
+	PersonRounded,
+	GroupRounded
 } from "@mui/icons-material";
 import {
 	logoutFromAccount,
@@ -41,35 +43,45 @@ import {
 import { isTokenExpired } from "@app/utils";
 import _ from "lodash";
 
-const drawerWidth = 190;
+const drawerWidth = 230;
 const menuItems = [
 	{
-		name: "Profile",
-		icon: <AccountBoxOutlined />
+		header: "General",
+		items: [
+			{
+				name: "Profile",
+				icon: <AccountBoxRounded />
+			},
+			{
+				name: "Idea",
+				icon: <ArticleRounded />
+			}
+		]
 	},
 	{
-		name: "Idea",
-		icon: <ArticleOutlined />
-	},
-	{
-		name: "Category",
-		icon: <TagOutlined />
-	},
-	{
-		name: "Year",
-		icon: <CalendarTodayOutlined />
-	},
-	{
-		name: "Department",
-		icon: <CorporateFareOutlined />
-	},
-	{
-		name: "User",
-		icon: <PersonOutlined />
-	},
-	{
-		name: "Role",
-		icon: <GroupOutlined />
+		header: "Management",
+		items: [
+			{
+				name: "Category",
+				icon: <TagRounded />
+			},
+			{
+				name: "Year",
+				icon: <CalendarTodayRounded />
+			},
+			{
+				name: "Department",
+				icon: <CorporateFareRounded />
+			},
+			{
+				name: "User",
+				icon: <PersonRounded />
+			},
+			{
+				name: "Role",
+				icon: <GroupRounded />
+			}
+		]
 	}
 ];
 
@@ -79,7 +91,8 @@ export function HomePage() {
 	const dispatch = useDispatch();
 	const { token } = useSelector((state: RootState) => state.auth);
 	const [openDrawer, setOpenDrawer] = useState(false);
-	const [selectedItem, setSelectedItem] = useState(menuItems[0].name);
+	const [selectedCategory, setSelectedCategory] = useState(menuItems[1].header);
+	const [selectedItem, setSelectedItem] = useState(menuItems[1].items[2].name);
 	const mediaQueries = {
 		sm: useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"))
 	};
@@ -119,7 +132,10 @@ export function HomePage() {
 				sx={{
 					width: { sm: `calc(100% - ${drawerWidth}px)` },
 					ml: { sm: `${drawerWidth}px` },
-					backgroundColor: "white"
+					backgroundColor: "rgba(255, 255, 255, 0.7)",
+					backdropFilter: "blur(20px)",
+					boxShadow: "none",
+					px: 5
 				}}
 			>
 				<Toolbar>
@@ -127,14 +143,14 @@ export function HomePage() {
 						<MenuOutlined />
 					</IconButton>
 					<Typography
-						variant="h6"
+						variant="h5"
 						sx={{
+							fontWeight: 500,
 							flexGrow: 1,
-							display: "block",
-							color: "black"
+							display: "block"
 						}}
 					>
-						University
+						University Dashboard
 					</Typography>
 					<IconButton
 						onClick={() => {
@@ -161,30 +177,86 @@ export function HomePage() {
 						}
 					}}
 				>
-					<List>
-						{menuItems.map((item) => (
-							<NavLink
-								to={`/${item.name.toLowerCase()}`}
-								style={{ textDecoration: "none", color: "unset" }}
-							>
-								<ListItemButton
-									key={item.name}
-									selected={selectedItem === item.name}
-									onClick={() => {
-										setSelectedItem(item.name);
+					<br />
+					{menuItems.map((list) => (
+						<List
+							sx={{ px: 1.3 }}
+							subheader={
+								<ListSubheader
+									sx={{
+										letterSpacing: "1px",
+										lineHeight: "36px",
+										color: "#555559",
+										fontSize: "0.780rem",
+										fontWeight: 700
 									}}
 								>
-									<ListItemIcon>{item.icon}</ListItemIcon>
-									<ListItemText primary={item.name} />
-								</ListItemButton>
-							</NavLink>
-						))}
-					</List>
+									{list.header.toUpperCase()}
+								</ListSubheader>
+							}
+						>
+							{list.items.map((item) => (
+								<NavLink
+									to={`/${item.name.toLowerCase()}`}
+									style={{ textDecoration: "none", color: "unset" }}
+								>
+									<ListItemButton
+										key={item.name}
+										selected={selectedItem === item.name}
+										onClick={() => {
+											setSelectedCategory(list.header);
+											setSelectedItem(item.name);
+										}}
+										sx={{
+											mb: 1,
+											borderRadius: 2.5,
+											"&.Mui-selected": {
+												backgroundColor: "rgba(0, 0, 0, 0.04)",
+												"&:hover": {
+													backgroundColor: "rgba(0, 0, 0, 0.04)"
+												},
+												".MuiTypography-root": {
+													color: "#0072E5",
+													fontWeight: 500
+												},
+												".MuiSvgIcon-root": {
+													fill: "#0072E5"
+												}
+											}
+										}}
+									>
+										<ListItemIcon
+											sx={{
+												minWidth: 30,
+												mr: 1,
+												".MuiSvgIcon-root": {
+													width: "0.8em",
+													height: "0.8em"
+												}
+											}}
+										>
+											{item.icon}
+										</ListItemIcon>
+										<ListItemText
+											primaryTypographyProps={{
+												sx: { color: "rgba(0, 0, 0, 0.75)" }
+											}}
+											primary={item.name}
+										/>
+									</ListItemButton>
+								</NavLink>
+							))}
+						</List>
+					))}
 				</Drawer>
 			</Box>
 			<Box flexGrow={1} width={{ sm: `calc(100% - ${drawerWidth}px)` }} display="flex" flexDirection="column">
 				<Toolbar />
-				<Box padding={3}>
+				<Breadcrumbs sx={{ px: 8 }}>
+					<Typography color="rgba(0, 0, 0, 0.6)">{selectedCategory}</Typography>
+					<Typography>{selectedItem}</Typography>
+				</Breadcrumbs>
+				<Box px={8} py={3}>
 					<Outlet />
 				</Box>
 			</Box>
