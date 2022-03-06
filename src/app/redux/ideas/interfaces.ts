@@ -43,7 +43,7 @@ export interface IdeaData {
 	categories: number[] | CategoryData[];
 	viewCount: number;
 	reactionScore: number;
-	documents: FileList | IdeaDocumentData[];
+	documents: File[] | IdeaDocumentData[];
 	academicYear?: number | YearData;
 	createTimestamp: string | Date;
 }

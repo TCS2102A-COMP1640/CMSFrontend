@@ -1,6 +1,6 @@
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
-import { pushMessage } from "@app/redux";
+import { pushMessage, YearData } from "@app/redux";
 import {
 	IdeaResponseData,
 	IdeaCommentData,
@@ -92,13 +92,13 @@ export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
 		} = getState();
 		const body = new FormData();
 		body.append("content", payload.content as string);
-		body.append("academicYear", _.toString(payload.academicYear));
+		body.append("academicYear", _.toString((payload.academicYear as YearData).id));
 
 		if (!_.isUndefined(payload.categories)) {
 			body.append("categories", JSON.stringify(payload.categories));
 		}
 		if (!_.isUndefined(payload.documents)) {
-			Array.from(payload.documents as FileList).forEach((file) => {
+			(payload.documents as File[]).forEach((file) => {
 				body.append("documents", file);
 			});
 		}

@@ -1,26 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import {
-	Table,
-	TableHead,
-	TableBody,
-	TableCell,
-	TableRow,
-	TableContainer,
-	Paper,
-	Box,
-	Grid,
-	Toolbar,
-	Button,
-	IconButton,
-	Card,
-	TextField,
-	CardContent,
-	CardActions,
-	Modal,
-	Typography
-} from "@mui/material";
-import { AddCircleOutlined, EditOutlined, DeleteOutlined, CancelOutlined } from "@mui/icons-material";
+import { Grid } from "@mui/material";
+import { StyledTextField, StyledTableForm } from "@app/components";
 import {
 	RootState,
 	useAppDispatch,
@@ -30,189 +11,102 @@ import {
 	editCategory,
 	deleteCategory
 } from "@app/redux";
+import { TableCellMapper } from "@app/utils";
 import _ from "lodash";
 
-const tableCells = [
+const tableCells: TableCellMapper<CategoryData>[] = [
 	{
-		label: "ID"
+		label: "ID",
+		align: "center",
+		width: "10%",
+		sx: {
+			fontWeight: 500
+		},
+		mapper: (data) => _.toString(data.id)
 	},
 	{
-		label: "Name"
-	},
-	{
-		label: "Actions"
+		label: "Name",
+		align: "center",
+		width: "50%",
+		mapper: (data) => data.name
 	}
 ];
 
 interface Captions {
 	name?: string;
+	openingDate?: string;
+	closureDate?: string;
+	finalClosureDate?: string;
 }
 
 export function CategoryPage() {
 	const dispatch = useAppDispatch();
-	const { data } = useSelector((state: RootState) => state.categories.getCategories);
-	const [mode, setMode] = useState<"create" | "edit" | "delete">("create");
-	const [openModal, setOpenModal] = useState(false);
-	const [formModal, setFormModal] = useState<Partial<CategoryData>>({});
-	const [captionsModal, setCaptionsModal] = useState<Captions>();
-
-	useEffect(() => {
-		dispatch(getCategories());
-	}, []);
+	const { data, status } = useSelector((state: RootState) => state.categories.getCategories);
+	const [form, setForm] = useState<Partial<CategoryData>>({});
+	const [captions, setCaptions] = useState<Captions>();
 
 	const validate = () => {
 		const captions: Captions = {};
 
-		if (_.isEmpty(formModal.name)) {
+		if (_.isEmpty(form.name)) {
 			captions.name = "Please enter a valid name";
 		}
 
-		setCaptionsModal(captions);
+		setCaptions(captions);
 
 		return _.isEmpty(captions) ? true : false;
 	};
 
-	const performOpenModal = (mode: "create" | "edit" | "delete", row: Partial<CategoryData>) => {
-		setMode(mode);
-		setFormModal(row);
-		setOpenModal(true);
-	};
-	const performCloseModal = () => {
-		setFormModal({});
-		setOpenModal(false);
-		setCaptionsModal({});
-	};
-
 	return (
-		<Box px={{ sm: 0, md: 7 }}>
-			<Modal open={openModal} onClose={performCloseModal}>
-				<Card
-					sx={{
-						minWidth: { xs: 310, sm: 450 },
-						position: "absolute",
-						top: "50%",
-						left: "50%",
-						transform: "translate(-50%, -50%)"
-					}}
-				>
-					<CardContent>
-						{mode === "delete" ? (
-							<Typography textAlign="center" variant="h6">
-								Confirmation
-							</Typography>
-						) : (
-							<Grid container direction="column" spacing={2}>
-								<Grid item>
-									<TextField
-										fullWidth
-										value={formModal.name}
-										onChange={(e) => setFormModal({ ...formModal, name: e.target.value })}
-										error={!_.isUndefined(captionsModal?.name) ? true : false}
-										helperText={captionsModal?.name}
-										label="Name"
-									/>
-								</Grid>
-							</Grid>
-						)}
-					</CardContent>
-					<CardActions sx={{ justifyContent: "center" }}>
-						<Button
-							variant="outlined"
-							onClick={() => {
-								switch (mode) {
-									case "create":
-										if (validate()) {
-											dispatch(createCategory(formModal as Omit<CategoryData, "id">)).then(() =>
-												dispatch(getCategories())
-											);
-											performCloseModal();
-										}
-										return;
-									case "edit":
-										dispatch(editCategory(formModal)).then(() => dispatch(getCategories()));
-										break;
-									case "delete":
-										dispatch(deleteCategory({ id: formModal.id as number })).then(() =>
-											dispatch(getCategories())
-										);
-										break;
-								}
-								performCloseModal();
-							}}
-							endIcon={
-								mode === "create" ? (
-									<AddCircleOutlined />
-								) : mode === "edit" ? (
-									<EditOutlined />
-								) : (
-									<DeleteOutlined />
-								)
-							}
-						>
-							{mode === "create" ? "Create" : mode === "edit" ? "Edit" : "Delete"}
-						</Button>
-
-						<Button
-							variant="outlined"
-							onClick={() => {
-								performCloseModal();
-							}}
-							endIcon={<CancelOutlined />}
-						>
-							Cancel
-						</Button>
-					</CardActions>
-				</Card>
-			</Modal>
-			<Paper>
-				<Toolbar sx={{ alignContent: "center" }}>
-					<Button
-						fullWidth
-						onClick={() => performOpenModal("create", {})}
-						variant="outlined"
-						endIcon={<AddCircleOutlined />}
-					>
-						Create
-					</Button>
-				</Toolbar>
-				<TableContainer component={Paper}>
-					<Table sx={{ minWidth: { md: 300 } }} size="small">
-						<TableHead>
-							<TableRow>
-								{tableCells.map((cell) => {
-									return (
-										<TableCell sx={{ fontWeight: 600 }} align="center" variant="head">
-											{cell.label}
-										</TableCell>
-									);
-								})}
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							{data.map((row) => {
-								return (
-									<TableRow
-										hover
-										key={row.id}
-										sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-									>
-										<TableCell align="center">{row.id}</TableCell>
-										<TableCell align="center">{row.name}</TableCell>
-										<TableCell align="center">
-											<IconButton onClick={() => performOpenModal("edit", row)}>
-												<EditOutlined />
-											</IconButton>
-											<IconButton onClick={() => performOpenModal("delete", row)}>
-												<DeleteOutlined />
-											</IconButton>
-										</TableCell>
-									</TableRow>
-								);
-							})}
-						</TableBody>
-					</Table>
-				</TableContainer>
-			</Paper>
-		</Box>
+		<StyledTableForm
+			name="Category"
+			data={data}
+			formContent={
+				<Grid container direction="column" spacing={2}>
+					<Grid item>
+						<StyledTextField
+							fullWidth
+							value={form.name}
+							onChange={(e) => setForm({ ...form, name: e.target.value })}
+							error={!_.isUndefined(captions?.name) ? true : false}
+							helperText={captions?.name}
+							placeholder="Innovation"
+							label="Name"
+						/>
+					</Grid>
+				</Grid>
+			}
+			tableCellMappers={tableCells}
+			tableOverlay={status === "pending" ? "loading" : _.isEmpty(data) ? "empty" : "none"}
+			onFormOpen={(data) => {
+				setForm(data);
+			}}
+			onFormClose={() => {
+				setCaptions({});
+			}}
+			onFormCreate={(shouldClose, { page, pageLimit }) => {
+				if (validate()) {
+					dispatch(createCategory(form as Omit<CategoryData, "id">)).then(() =>
+						dispatch(getCategories({ page, pageLimit }))
+					);
+					shouldClose();
+				}
+			}}
+			onFormEdit={(shouldClose, { page, pageLimit }) => {
+				if (validate()) {
+					dispatch(editCategory(form)).then(() => dispatch(getCategories({ page, pageLimit })));
+					shouldClose();
+				}
+			}}
+			onFormDelete={(shouldClose, { page, pageLimit }) => {
+				dispatch(deleteCategory({ id: form.id as number })).then(() =>
+					dispatch(getCategories({ page, pageLimit }))
+				);
+				shouldClose();
+			}}
+			onTablePagination={({ page, pageLimit }) => {
+				dispatch(getCategories({ page, pageLimit }));
+			}}
+		/>
 	);
 }

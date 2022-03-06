@@ -1,5 +1,5 @@
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
-import { APIPaths, fetchHandler } from "@app/utils";
+import { APIPaths, fetchHandler, PaginationPayload } from "@app/utils";
 import { pushMessage } from "@app/redux";
 import { YearData, YearResponseData } from "./interfaces";
 import { parseISO } from "date-fns";
@@ -7,14 +7,14 @@ import _ from "lodash";
 
 export const resetYearsState = createAction("years/reset");
 
-export const getYears = createAsyncThunk<YearData[]>(
+export const getYears = createAsyncThunk<YearData[], PaginationPayload>(
 	"years/getYears",
 	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
 		const { data, error } = <{ data: YearResponseData[]; error?: Error }>(
-			await fetchHandler({ path: APIPaths.Years, method: "GET", token })
+			await fetchHandler({ path: APIPaths.Years, method: "GET", query: payload, token })
 		);
 		if (_.isNil(error)) {
 			return data.map((year) => {
@@ -27,6 +27,29 @@ export const getYears = createAsyncThunk<YearData[]>(
 			});
 		}
 		dispatch(pushMessage({ message: error.message, severity: "error" }));
+		return rejectWithValue(error);
+	}
+);
+
+export const getYearsByName = createAsyncThunk<YearData[], Pick<YearData, "name">>(
+	"years/getYearsByName",
+	async (payload, { rejectWithValue, getState }) => {
+		const {
+			auth: { token }
+		} = getState();
+		const { data, error } = <{ data: YearResponseData[]; error?: Error }>(
+			await fetchHandler({ path: `${APIPaths.Years}/:name`, method: "GET", params: payload, token })
+		);
+		if (_.isNil(error)) {
+			return data.map((year) => {
+				return {
+					...year,
+					openingDate: parseISO(year.openingDate as string),
+					closureDate: parseISO(year.closureDate as string),
+					finalClosureDate: parseISO(year.finalClosureDate as string)
+				};
+			});
+		}
 		return rejectWithValue(error);
 	}
 );

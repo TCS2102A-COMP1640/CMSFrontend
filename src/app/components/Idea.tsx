@@ -10,11 +10,12 @@ import {
 	AccordionDetails,
 	Theme,
 	Chip,
-	TextField,
 	useMediaQuery,
-	Tooltip
+	Tooltip,
+	Divider,
+	Box
 } from "@mui/material";
-import { ThumbUp, ThumbDown, Comment, ExpandMore, SendOutlined } from "@mui/icons-material";
+import { ThumbUp, ThumbDown, Comment, ExpandMore, SendOutlined, AccessTimeFilled } from "@mui/icons-material";
 import {
 	getIdeaComments,
 	CategoryData,
@@ -28,7 +29,8 @@ import {
 	createIdeaReaction,
 	createIdeaView
 } from "@app/redux";
-import { format } from "date-fns";
+import { StyledTextField, PrimaryButton } from "@app/components";
+import { format, formatDistance } from "date-fns";
 import _ from "lodash";
 
 export interface IdeaProps {
@@ -59,6 +61,7 @@ function IdeaInternal(props: IdeaProps) {
 	const [inputComment, setInputComment] = useState("");
 	const [openComments, setOpenComments] = useState(false);
 	const [loadingComments, setLoadingComments] = useState(false);
+	const [loadingCommentCreate, setloadingCommentCreate] = useState(false);
 
 	const mediaQueries = {
 		sm: useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"))
@@ -111,7 +114,10 @@ function IdeaInternal(props: IdeaProps) {
 					{department?.name ?? "Unassigned"}
 				</Typography>
 				<Typography color="gray" variant="caption">
-					{format(createTimestamp as Date, "dd/MM/yyyy hh:mm:ss")}
+					<Tooltip title={format(createTimestamp as Date, "dd/MM/yyyy hh:mm:ss")}>
+						<AccessTimeFilled sx={{ width: 16, height: 16, verticalAlign: "sub", pr: 0.7 }} />
+					</Tooltip>
+					{formatDistance(createTimestamp as Date, new Date(), { addSuffix: true })}
 				</Typography>
 			</AccordionSummary>
 			<AccordionDetails>
@@ -124,7 +130,7 @@ function IdeaInternal(props: IdeaProps) {
 						{!_.isEmpty(categories) && (
 							<Stack direction="row" spacing={2}>
 								{categories.map((category) => (
-									<Chip sx={{ height: 24 }} label={(category as CategoryData).name} />
+									<Chip sx={{ height: 18 }} label={(category as CategoryData).name} />
 								))}
 							</Stack>
 						)}
@@ -133,7 +139,21 @@ function IdeaInternal(props: IdeaProps) {
 							<Stack direction="row" spacing={2}>
 								{(documents as IdeaDocumentData[]).map((document) => (
 									<Tooltip title={document.name}>
-										<Chip clickable sx={{ height: 24, maxWidth: 120 }} label={document.name} />
+										<Chip
+											sx={{
+												height: 18,
+												maxWidth: 120,
+												backgroundColor: "rgb(80, 72, 229)",
+												color: "white",
+												"& .MuiSvgIcon-root": {
+													fill: "white",
+													"&:hover": {
+														fill: "rgba(255, 255, 255, 0.8)"
+													}
+												}
+											}}
+											label={document.name}
+										/>
 									</Tooltip>
 								))}
 							</Stack>
@@ -171,12 +191,57 @@ function IdeaInternal(props: IdeaProps) {
 					</Grid>
 					<Grid item alignSelf="left" display={openComments && !loadingComments ? "block" : "none"}>
 						<Grid container spacing={2} flexDirection="column">
+							{!_.isEmpty(comments) && (
+								<Grid item>
+									<br />
+									<Divider />
+									<br />
+								</Grid>
+							)}
+							{comments.map((comment) => {
+								return (
+									<Grid
+										item
+										justifyContent="left"
+										sx={{
+											backgroundColor: "rgb(249, 250, 252)",
+											borderRadius: 3,
+											my: 1,
+											mx: 3,
+											px: 2,
+											py: 1
+										}}
+									>
+										<Box display="flex">
+											<Typography textAlign="left" variant="subtitle2" fontWeight={600}>
+												{comment.user.department?.name ?? "Unassigned"}
+											</Typography>
+											<Box flexGrow={1} />
+											<Typography color="gray" variant="caption">
+												{formatDistance(comment.createTimestamp as Date, new Date(), {
+													addSuffix: true
+												})}
+											</Typography>
+										</Box>
+										<Typography fontSize={15} textAlign="left" variant="body2">
+											{comment.content}
+										</Typography>
+									</Grid>
+								);
+							})}
+							{!_.isEmpty(comments) && (
+								<Grid item>
+									<br />
+									<Divider />
+									<br />
+								</Grid>
+							)}
 							<Grid item xs>
-								<Stack direction="row">
-									<TextField
+								<Stack direction="column">
+									<StyledTextField
 										onChange={(e) => setInputComment(e.target.value)}
 										multiline
-										rows={1}
+										rows={2}
 										disabled={disableComment}
 										placeholder="Write a comment"
 										sx={{
@@ -184,38 +249,37 @@ function IdeaInternal(props: IdeaProps) {
 										}}
 										InputProps={{
 											sx: {
-												height: 23
+												borderRadius: 2
 											}
 										}}
 									/>
-									<IconButton
-										disabled={disableComment}
-										sx={{ height: 33, width: 33 }}
+									<PrimaryButton
+										sx={{ width: 110, mt: 1, float: "right" }}
+										endIcon={!loadingCommentCreate ? <SendOutlined /> : undefined}
 										onClick={() => {
+											setloadingCommentCreate(true);
 											dispatch(
 												createIdeaComment({ id, academicYear, content: inputComment })
-											).then(getComments);
+											).then(() => {
+												getComments();
+												setloadingCommentCreate(false);
+											});
 										}}
-									>
-										<SendOutlined fontSize="small" />
-									</IconButton>
+										size="small"
+										text={
+											!loadingCommentCreate ? (
+												"Post"
+											) : (
+												<CircularProgress
+													sx={{ "& .MuiCircularProgress-svg": { color: "white" } }}
+													size={24}
+												/>
+											)
+										}
+										disabled={disableComment}
+									/>
 								</Stack>
 							</Grid>
-							{comments.map((comment) => {
-								return (
-									<Grid item justifyContent="left">
-										<Typography textAlign="left" variant="subtitle2" fontWeight={600}>
-											{comment.user.department?.name ?? "Unassigned"}
-										</Typography>
-										<Typography color="gray" fontSize={12} textAlign="left" variant="caption">
-											{format(comment.createTimestamp as Date, "dd/MM/yyyy hh:mm:ss")}
-										</Typography>
-										<Typography textAlign="left" variant="body2">
-											{comment.content}
-										</Typography>
-									</Grid>
-								);
-							})}
 						</Grid>
 					</Grid>
 				</Grid>

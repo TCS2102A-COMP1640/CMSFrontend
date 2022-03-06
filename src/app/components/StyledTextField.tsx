@@ -10,20 +10,26 @@ export function StyledTextField(props: TextFieldProps) {
 	const { label, ...textFieldProps } = props;
 
 	return (
-		<React.Fragment>
+		<>
 			{!_.isUndefined(label) && <InputLabel sx={{ pb: "8px", fontWeight: 500 }}>{label}</InputLabel>}
 			<StyledTextFieldInternal
 				InputProps={{
 					sx: {
-						borderRadius: 2,
-						height: 50
-					}
+						borderRadius: 5,
+						minHeight: 50,
+						...textFieldProps.InputProps?.sx
+					},
+					...textFieldProps.InputProps
 				}}
 				FormHelperTextProps={{
-					sx: { fontSize: 13 }
+					sx: {
+						fontSize: 13,
+						...textFieldProps.FormHelperTextProps?.sx
+					},
+					...textFieldProps.FormHelperTextProps
 				}}
 				{...textFieldProps}
 			/>
-		</React.Fragment>
+		</>
 	);
 }

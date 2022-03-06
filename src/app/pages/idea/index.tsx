@@ -1,46 +1,88 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import {
 	Grid,
 	Pagination,
-	Typography,
 	Theme,
-	Skeleton,
 	Card,
-	CardHeader,
+	Autocomplete,
 	CardContent,
 	CardActions,
-	Button,
-	TextField,
-	Modal,
 	useMediaQuery,
-	Select,
 	MenuItem,
 	Chip,
 	Box,
-	InputLabel,
-	FormControl,
-	Divider,
-	Stack
+	IconButton,
+	LinearProgress,
+	Stack,
+	Menu,
+	Badge,
+	CircularProgress
 } from "@mui/material";
-import { SendOutlined, CancelOutlined } from "@mui/icons-material";
-import { RootState, IdeaData, getIdeas, useAppDispatch, getYears, createIdea, getCategories } from "@app/redux";
-import { Idea } from "@app/components";
+import {
+	SendOutlined,
+	LocalOfferOutlined,
+	AttachmentRounded,
+	FilterListRounded,
+	DownloadRounded
+} from "@mui/icons-material";
+import {
+	RootState,
+	YearData,
+	IdeaData,
+	getIdeas,
+	useAppDispatch,
+	getYearsByName,
+	createIdea,
+	getCategories
+} from "@app/redux";
+import { Idea, PrimaryButton, StyledTextField } from "@app/components";
 import _ from "lodash";
 import { APIPaths } from "@app/utils";
 
-const itemSkeletons: JSX.Element[] = [];
+type Order = "latest" | "views" | "reactions" | undefined;
 
-for (let i = 0; i < 5; i++) {
-	itemSkeletons.push(
-		<Grid item height={70}>
-			<Skeleton height="100%" />
-		</Grid>
-	);
+interface Filter {
+	label: string;
+	order: Order;
 }
 
 interface Captions {
 	content?: string;
+}
+
+const filters: Filter[] = [
+	{
+		label: "None",
+		order: undefined
+	},
+	{
+		label: "Latest",
+		order: "latest"
+	},
+	{
+		label: "Most viewed",
+		order: "views"
+	},
+	{
+		label: "Most popular",
+		order: "reactions"
+	}
+];
+
+function isYearValid(year?: YearData): "invalid" | "closure" | "valid" {
+	if (_.isUndefined(year)) {
+		return "invalid";
+	}
+	const date = new Date();
+	if (year.openingDate <= date && date <= year.closureDate) {
+		return "valid";
+	}
+	if (year.closureDate <= date && date <= year.finalClosureDate) {
+		return "closure";
+	}
+
+	return "invalid";
 }
 
 export function IdeaPage() {
@@ -50,14 +92,40 @@ export function IdeaPage() {
 		status: ideasStatus,
 		pages: ideasPages
 	} = useSelector((state: RootState) => state.ideas.getIdeas);
+	const { status: ideasCreateStatus } = useSelector((state: RootState) => state.ideas.createIdea);
 	const { token } = useSelector((state: RootState) => state.auth);
-	const { data: yearsData } = useSelector((state: RootState) => state.years.getYears);
-	const { data: categoriesData } = useSelector((state: RootState) => state.categories.getCategories);
+	const { data: yearsData, status: yearsStatus } = useSelector((state: RootState) => state.years.getYearsByName);
+	const { data: categoriesData, status: categoriesStatus } = useSelector(
+		(state: RootState) => state.categories.getCategories
+	);
 	const [page, setPage] = useState(1);
-	const [order, setOrder] = useState<"views" | "reactions" | "latest" | undefined>(undefined);
-	const [openModal, setOpenModal] = useState(false);
-	const [formModal, setFormModal] = useState<Partial<IdeaData>>({});
-	const [captionsModal, setCaptionsModal] = useState<Captions>({});
+	const [form, setForm] = useState<Partial<IdeaData>>({});
+	const [captions, setCaptions] = useState<Captions>({});
+
+	const [filter, setFilter] = useState<Filter | undefined>(undefined);
+	const [filterAnchor, setFilterAnchor] = useState<HTMLElement | undefined>(undefined);
+	const [openFilter, setOpenFilter] = useState(false);
+
+	const getIdeasPaginated = () => {
+		dispatch(
+			getIdeas({
+				page: page - 1,
+				pageLimit: 5,
+				academicYear: (form.academicYear as YearData)?.id as number,
+				order: filter?.order
+			})
+		);
+	};
+
+	const getYearsBySearch = useMemo(
+		() =>
+			_.throttle((name) => {
+				dispatch(getYearsByName({ name }));
+			}, 200),
+		[]
+	);
+
+	const disablePostingIdea = isYearValid(form.academicYear as YearData) !== "valid";
 
 	const mediaQueries = {
 		sm: useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"))
@@ -66,328 +134,257 @@ export function IdeaPage() {
 	const validate = () => {
 		const captions: Captions = {};
 
-		if (_.isEmpty(formModal.content)) {
+		if (_.isEmpty(form.content)) {
 			captions.content = "Please enter your idea here";
 		}
 
-		setCaptionsModal(captions);
+		setCaptions(captions);
 
 		return _.isEmpty(captions) ? true : false;
 	};
 
 	useEffect(() => {
-		dispatch(getYears());
-		dispatch(getCategories());
-	}, []);
-
-	useEffect(() => {
-		dispatch(
-			getIdeas({
-				page: page - 1,
-				pageLimit: itemSkeletons.length,
-				academicYear: formModal.academicYear as number,
-				order
-			})
-		);
-	}, [page, order, formModal.academicYear]);
+		getIdeasPaginated();
+	}, [page, filter, form.academicYear]);
 
 	return (
 		<Grid container direction="column" px={{ xs: 0, sm: 5, md: 15 }} spacing={2}>
-			<Modal
-				open={openModal}
-				onClose={() => {
-					setOpenModal(false);
-					setCaptionsModal({});
-				}}
-			>
-				<Card
-					sx={{
-						minWidth: { xs: 310, sm: 450 },
-						position: "absolute",
-						top: "50%",
-						left: "50%",
-						transform: "translate(-50%, -50%)"
-					}}
-				>
-					<CardHeader sx={{ textAlign: "center", p: 1 }} title="Create idea" />
-					<Divider />
-					<CardContent>
-						<TextField
-							multiline
-							fullWidth
-							error={!_.isUndefined(captionsModal.content) ? true : false}
-							helperText={captionsModal.content}
-							rows={4}
-							value={formModal.content}
-							onChange={(e) => setFormModal({ ...formModal, content: e.target.value })}
-							placeholder="Please tell us your idea here..."
-						/>
-						<FormControl sx={{ minWidth: 110, mt: 2 }}>
-							<InputLabel
-								id="select-category-label"
+			<Grid item width="100%" alignSelf="center">
+				<Grid container spacing={2}>
+					<Grid item sx={{ alignSelf: "center" }}>
+						<IconButton
+							disabled={_.isUndefined(form.academicYear)}
+							onClick={(e) => {
+								setOpenFilter(true);
+								setFilterAnchor(e.currentTarget);
+							}}
+						>
+							<FilterListRounded />
+						</IconButton>
+						<Menu open={openFilter} onClose={() => setOpenFilter(false)} anchorEl={filterAnchor}>
+							{filters.map((filter) => (
+								<MenuItem
+									onClick={() => {
+										setOpenFilter(false);
+										setFilter(filter);
+									}}
+									value={filter.order}
+								>
+									{filter.label}
+								</MenuItem>
+							))}
+						</Menu>
+					</Grid>
+					<Grid item sx={{ alignSelf: "center" }} xs={0.9}>
+						<IconButton
+							disabled={_.isUndefined(form.academicYear)}
+							href={`${APIPaths.Ideas}/csv?academicYear=${
+								(form.academicYear as YearData)?.id
+							}&token=${token}`}
+							download
+						>
+							<Badge
+								badgeContent="CSV"
+								anchorOrigin={{
+									horizontal: "right",
+									vertical: "bottom"
+								}}
 								sx={{
-									top: _.isEmpty(formModal.categories) ? -9 : 0,
-									"&.Mui-focused": {
-										top: 0
+									"& .MuiBadge-badge": {
+										backgroundColor: "rgb(80, 72, 229)",
+										color: "white",
+										right: -10,
+										top: -3,
+										fontSize: "0.60rem",
+										border: `1px solid white`
 									}
 								}}
 							>
-								Category
-							</InputLabel>
-							<Select
-								labelId="select-category-label"
-								label="Category"
-								value={
-									_.isEmpty(formModal.categories)
-										? ""
-										: _.toString(_.first(formModal.categories as number[]))
-								}
-								onChange={(e) => {
-									setFormModal({ ...formModal, categories: [_.toInteger(e.target.value)] });
-								}}
-								renderValue={(value: string) => {
-									return (
-										<Chip
-											sx={{ height: 24 }}
-											label={_.toString(
-												_.find(categoriesData, (data) => value === _.toString(data.id))?.name
-											)}
-											onDelete={() => {}}
-											deleteIcon={
-												<Box
-													display="flex"
-													onMouseDown={(e) => {
-														e.stopPropagation();
-														setFormModal({ ...formModal, categories: [] });
-													}}
-												>
-													<CancelOutlined fontSize="small" />
-												</Box>
-											}
-										/>
-									);
+								<DownloadRounded />
+							</Badge>
+						</IconButton>
+					</Grid>
+					<Grid item sx={{ alignSelf: "center" }}>
+						<IconButton
+							disabled={_.isUndefined(form.academicYear)}
+							href={`${APIPaths.Ideas}/documents?academicYear=${
+								(form.academicYear as YearData)?.id
+							}&token=${token}`}
+							download
+						>
+							<Badge
+								badgeContent="DOCS"
+								anchorOrigin={{
+									horizontal: "right",
+									vertical: "bottom"
 								}}
 								sx={{
-									height: 36
+									"& .MuiBadge-badge": {
+										backgroundColor: "rgb(80, 72, 229)",
+										color: "white",
+										right: -10,
+										top: -3,
+										fontSize: "0.60rem",
+										border: `1px solid white`
+									}
 								}}
 							>
-								{categoriesData.map((data) => {
+								<DownloadRounded />
+							</Badge>
+						</IconButton>
+					</Grid>
+					<Grid item flexGrow={1} />
+					<Grid item xs={2.5}>
+						<Autocomplete
+							value={form.academicYear as YearData}
+							options={yearsData}
+							filterSelectedOptions
+							autoComplete
+							filterOptions={(options) => options}
+							getOptionLabel={(option) => option.name}
+							loading={yearsStatus === "pending"}
+							renderInput={(params) => (
+								<StyledTextField
+									{...params}
+									label="Year"
+									InputProps={{
+										sx: {
+											height: 36,
+											"& .MuiInputBase-input": {
+												p: "0!important",
+												height: 16
+											}
+										},
+										...params.InputProps
+									}}
+								/>
+							)}
+							onChange={(e, value) => {
+								setForm({
+									...form,
+									academicYear: _.isNull(value) ? undefined : (value as YearData)
+								});
+							}}
+							onInputChange={(e, value) => {
+								getYearsBySearch(value);
+							}}
+						/>
+					</Grid>
+				</Grid>
+			</Grid>
+
+			<Grid item>
+				<Card
+					sx={{
+						minWidth: { xs: 310, sm: 450 }
+					}}
+				>
+					<CardContent>
+						<StyledTextField
+							multiline
+							disabled={disablePostingIdea}
+							fullWidth
+							error={!_.isUndefined(captions.content) ? true : false}
+							helperText={captions.content}
+							rows={3}
+							value={form.content}
+							onChange={(e) => setForm({ ...form, content: e.target.value })}
+							placeholder="Please tell us your idea here..."
+							InputProps={{
+								sx: {
+									borderRadius: 3
+								}
+							}}
+						/>
+					</CardContent>
+					<CardContent sx={{ py: 0 }}>
+						<Stack direction="row" spacing={1}>
+							{!_.isUndefined(form.documents) &&
+								form.documents.map((file) => {
 									return (
-										<MenuItem key={data.id} value={_.toString(data.id)}>
-											{data.name}
-										</MenuItem>
+										<Chip
+											sx={{
+												backgroundColor: "rgb(80, 72, 229)",
+												color: "white",
+												height: 24,
+												"& .MuiSvgIcon-root": {
+													fill: "white",
+													"&:hover": {
+														fill: "rgba(255, 255, 255, 0.8)"
+													}
+												}
+											}}
+											onDelete={() => {
+												setForm({
+													...form,
+													documents: (form.documents as File[])?.filter((f) => f !== file)
+												});
+											}}
+											label={file.name}
+										/>
 									);
 								})}
-							</Select>
-						</FormControl>
-						<Button variant="outlined" component="label" sx={{ mt: 2, ml: 1 }}>
-							Upload documents
+						</Stack>
+					</CardContent>
+					<CardActions sx={{ pr: 2 }}>
+						<IconButton disabled={disablePostingIdea} sx={{ ml: 0.1 }}>
+							<LocalOfferOutlined />
+						</IconButton>
+						<IconButton disabled={disablePostingIdea} component="label" sx={{ ml: 1 }}>
+							<AttachmentRounded />
 							<input
 								onChange={(e) => {
-									setFormModal({ ...formModal, documents: e.target.files as FileList });
+									setForm({ ...form, documents: Array.from(e.target.files ?? []) });
 								}}
 								type="file"
 								multiple
 								hidden
 							/>
-						</Button>
-						<Stack direction="row" spacing={1} sx={{ mt: 2 }}>
-							{!_.isUndefined(formModal.documents) &&
-								Array.from(formModal.documents as FileList).map((file) => {
-									return <Chip sx={{ height: 24 }} label={file.name} />;
-								})}
-						</Stack>
-					</CardContent>
-					<CardActions>
-						<Button
-							fullWidth
-							endIcon={<SendOutlined />}
+						</IconButton>
+						<Box flexGrow={1} />
+						<PrimaryButton
+							endIcon={ideasCreateStatus === "idle" ? <SendOutlined /> : undefined}
 							onClick={() => {
 								if (validate()) {
-									dispatch(createIdea(formModal)).then(() => {
-										dispatch(
-											getIdeas({
-												page: page - 1,
-												pageLimit: itemSkeletons.length,
-												academicYear: formModal.academicYear as number
-											})
-										);
+									dispatch(createIdea(form)).then(() => {
+										setForm({ content: "", academicYear: form.academicYear });
+										getIdeasPaginated();
 									});
-									setOpenModal(false);
 								}
 							}}
-						>
-							Post
-						</Button>
+							size="small"
+							text={
+								ideasCreateStatus === "idle" ? (
+									"Post"
+								) : (
+									<CircularProgress
+										sx={{ "& .MuiCircularProgress-svg": { color: "white" } }}
+										size={24}
+									/>
+								)
+							}
+							disabled={disablePostingIdea}
+						/>
 					</CardActions>
 				</Card>
-			</Modal>
-			<Grid item alignSelf="center">
-				<Typography variant="h5">Ideas</Typography>
-			</Grid>
-
-			<Grid item width="100%" alignSelf="center">
-				<Grid container spacing={2}>
-					<Grid item>
-						<FormControl sx={{ minWidth: 80 }}>
-							<InputLabel
-								id="select-year-label"
-								sx={{
-									top: _.isUndefined(formModal.academicYear) ? -9 : 0,
-									"&.Mui-focused": {
-										top: 0
-									}
-								}}
-							>
-								Year
-							</InputLabel>
-							<Select
-								labelId="select-year-label"
-								label="Year"
-								value={formModal.academicYear}
-								onChange={(e) => setFormModal({ ...formModal, academicYear: e.target.value as number })}
-								sx={{
-									height: 36
-								}}
-							>
-								{yearsData.map((year) => {
-									return (
-										<MenuItem key={year.id} value={year.id}>
-											{year.name}
-										</MenuItem>
-									);
-								})}
-							</Select>
-						</FormControl>
-					</Grid>
-					<Grid item>
-						<FormControl sx={{ minWidth: 80 }}>
-							<InputLabel
-								id="select-filter-label"
-								sx={{
-									top: 0
-								}}
-							>
-								Filter
-							</InputLabel>
-							<Select
-								labelId="select-filter-label"
-								label="Filter"
-								value={_.isUndefined(order) ? "none" : order}
-								onChange={(e) =>
-									e.target.value === "none"
-										? setOrder(undefined)
-										: setOrder(e.target.value as keyof typeof order)
-								}
-								sx={{
-									height: 36
-								}}
-							>
-								<MenuItem key={-1} value={"none"}>
-									None
-								</MenuItem>
-								<MenuItem key={0} value={"latest"}>
-									Latest
-								</MenuItem>
-								<MenuItem key={1} value={"views"}>
-									Most viewed
-								</MenuItem>
-								<MenuItem key={2} value={"reactions"}>
-									Most popular
-								</MenuItem>
-							</Select>
-						</FormControl>
-					</Grid>
-					<Grid item>
-						<Button
-							disabled={_.isUndefined(formModal.academicYear)}
-							variant="outlined"
-							href={`${APIPaths.Ideas}/csv?academicYear=${formModal.academicYear}&token=${token}`}
-							download
-						>
-							Download CSV
-						</Button>
-					</Grid>
-					<Grid item>
-						<Button
-							disabled={_.isUndefined(formModal.academicYear)}
-							variant="outlined"
-							href={`${APIPaths.Ideas}/documents?academicYear=${formModal.academicYear}&token=${token}`}
-							download
-						>
-							Download Documents
-						</Button>
-					</Grid>
-					<Grid item flexGrow={1}></Grid>
-					<Grid item>
-						<Button
-							variant="outlined"
-							disabled={
-								_.isUndefined(formModal.academicYear)
-									? true
-									: (() => {
-											const year = _.find(
-												yearsData,
-												(year) => year.id === (formModal.academicYear as number)
-											);
-											if (!_.isUndefined(year)) {
-												const date = new Date();
-												if (year.openingDate <= date && date <= year.closureDate) {
-													return false;
-												}
-											}
-
-											return true;
-									  })()
-							}
-							endIcon={<SendOutlined />}
-							onClick={() => setOpenModal(true)}
-						>
-							Create an idea
-						</Button>
-					</Grid>
-				</Grid>
 			</Grid>
 
 			{ideasStatus === "pending" ? (
-				itemSkeletons
-			) : !_.isEmpty(ideasData) ? (
+				<Grid item textAlign="center" mt={3}>
+					<LinearProgress />
+				</Grid>
+			) : (
 				ideasData.map((idea) => {
 					return (
-						<Grid item>
+						<Grid item marginTop={1}>
 							<Idea
 								idea={idea}
-								academicYear={formModal.academicYear as number}
-								disableComment={
-									_.isUndefined(formModal.academicYear)
-										? true
-										: (() => {
-												const year = _.find(
-													yearsData,
-													(year) => year.id === (formModal.academicYear as number)
-												);
-												if (!_.isUndefined(year)) {
-													const date = new Date();
-													if (year.openingDate <= date && date <= year.finalClosureDate) {
-														return false;
-													}
-												}
-
-												return true;
-										  })()
-								}
+								academicYear={(form.academicYear as YearData)?.id}
+								disableComment={isYearValid(form.academicYear as YearData) === "invalid"}
 							/>
 						</Grid>
 					);
 				})
-			) : (
-				<Grid item>
-					<Typography>
-						{_.isUndefined(formModal.academicYear)
-							? "Please select a year"
-							: "There were no ideas submitted for this year..."}
-					</Typography>
-				</Grid>
 			)}
 			<Grid item alignSelf="center">
 				{!_.isEmpty(ideasData) && (

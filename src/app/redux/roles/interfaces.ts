@@ -13,6 +13,11 @@ export interface RolesState {
 		status: Status;
 		error?: Error;
 	};
+	getRolesByName: {
+		data: RoleData[];
+		status: Status;
+		error?: Error;
+	};
 	createRole: {
 		status: Status;
 		error?: Error;

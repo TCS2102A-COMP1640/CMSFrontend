@@ -1,61 +1,52 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
-	Table,
-	TableHead,
-	TableBody,
-	TableCell,
-	TableRow,
-	TableContainer,
-	Paper,
-	Box,
 	Grid,
-	Toolbar,
-	Button,
-	IconButton,
-	Card,
-	TextField,
-	CardContent,
-	CardActions,
-	Modal,
 	Typography,
+	Autocomplete,
+	Checkbox,
+	Chip,
+	IconButton,
 	Dialog,
 	DialogTitle,
-	List,
-	ListItem,
-	ListItemText,
-	FormControl,
-	MenuItem,
-	InputLabel,
-	Select,
-	Checkbox
+	DialogContent
 } from "@mui/material";
-import { AddCircleOutlined, EditOutlined, DeleteOutlined, CancelOutlined, ReadMoreOutlined } from "@mui/icons-material";
+import { CheckBoxOutlineBlank, CheckBox, ReadMoreOutlined } from "@mui/icons-material";
+import { StyledTextField, StyledTableForm } from "@app/components";
 import {
 	RootState,
 	useAppDispatch,
 	RoleData,
+	PermissionData,
 	getRoles,
 	createRole,
 	editRole,
 	deleteRole,
-	PermissionData,
 	getPermissions
 } from "@app/redux";
+import { TableCellMapper } from "@app/utils";
 import _ from "lodash";
 
-const tableCells = [
+const tableCells: TableCellMapper<RoleData>[] = [
 	{
-		label: "ID"
+		label: "ID",
+		align: "center",
+		width: "10%",
+		sx: {
+			fontWeight: 500
+		},
+		mapper: (data) => _.toString(data.id)
 	},
 	{
-		label: "Name"
+		label: "Name",
+		align: "center",
+		width: "20%",
+		mapper: (data) => data.name
 	},
 	{
-		label: "Permissions"
-	},
-	{
-		label: "Actions"
+		label: "Permissions",
+		align: "center",
+		width: "10%"
 	}
 ];
 
@@ -63,270 +54,179 @@ interface Captions {
 	name?: string;
 }
 
-interface PermissionNames {
-	[index: number]: string;
+function getColor(
+	permission: PermissionData
+): "default" | "success" | "primary" | "secondary" | "info" | "warning" | "error" {
+	if (permission.name.startsWith("*")) {
+		return "error";
+	}
+	if (permission.name.startsWith("user")) {
+		return "secondary";
+	}
+	if (permission.name.startsWith("idea")) {
+		return "primary";
+	}
+	if (permission.name.startsWith("role")) {
+		return "warning";
+	}
+	if (permission.name.startsWith("department")) {
+		return "info";
+	}
+	if (permission.name.startsWith("year")) {
+		return "success";
+	}
+	return "default";
 }
 
 export function RolePage() {
 	const dispatch = useAppDispatch();
-	const { data } = useSelector((state: RootState) => state.roles.getRoles);
+	const { data, status } = useSelector((state: RootState) => state.roles.getRoles);
 	const { data: permissionsData } = useSelector((state: RootState) => state.permissions.getPermissions);
-	const [permissionNames, setPermissionNames] = useState<PermissionNames>({});
-
-	const [mode, setMode] = useState<"create" | "edit" | "delete">("create");
-	const [openModal, setOpenModal] = useState(false);
-	const [formModal, setFormModal] = useState<Partial<RoleData>>({});
-	const [captionsModal, setCaptionsModal] = useState<Captions>();
+	const [form, setForm] = useState<Partial<RoleData>>({});
+	const [captions, setCaptions] = useState<Captions>();
 
 	const [openDialog, setOpenDialog] = useState(false);
-	const [showingPermissions, setShowingPermissions] = useState<PermissionData[]>([]);
+	const [permissions, setPermissions] = useState<PermissionData[]>([]);
 
 	useEffect(() => {
-		dispatch(getRoles());
 		dispatch(getPermissions());
 	}, []);
-
-	useEffect(() => {
-		const names: PermissionNames = {};
-		permissionsData.forEach((permission) => (names[permission.id] = permission.name));
-		setPermissionNames(names);
-	}, [permissionsData]);
 
 	const validate = () => {
 		const captions: Captions = {};
 
-		if (_.isEmpty(formModal.name)) {
+		if (_.isEmpty(form.name)) {
 			captions.name = "Please enter a valid name";
 		}
 
-		setCaptionsModal(captions);
+		setCaptions(captions);
 
 		return _.isEmpty(captions) ? true : false;
 	};
 
-	const performOpenModal = (mode: "create" | "edit" | "delete", row: Partial<RoleData>) => {
-		setMode(mode);
-		setFormModal({
-			...row,
-			permissions: row.permissions?.map((permission) => (permission as PermissionData).id) ?? []
-		});
-		setOpenModal(true);
-	};
-	const performCloseModal = () => {
-		setFormModal({});
-		setOpenModal(false);
-		setCaptionsModal({});
-	};
-
 	const performOpenDialog = (permissions: PermissionData[]) => {
 		setOpenDialog(true);
-		setShowingPermissions(permissions);
+		setPermissions(permissions);
 	};
 
 	const performCloseDialog = () => {
 		setOpenDialog(false);
 	};
 
-	return (
-		<Box px={{ sm: 0, md: 7 }}>
-			<Modal open={openModal} onClose={performCloseModal}>
-				<Card
-					sx={{
-						minWidth: { xs: 310, sm: 450 },
-						position: "absolute",
-						top: "50%",
-						left: "50%",
-						transform: "translate(-50%, -50%)"
-					}}
-				>
-					<CardContent>
-						{mode === "delete" ? (
-							<Typography textAlign="center" variant="h6">
-								Confirmation
-							</Typography>
-						) : (
-							<Grid container direction="column" spacing={2}>
-								<Grid item>
-									<TextField
-										fullWidth
-										value={formModal.name}
-										onChange={(e) => setFormModal({ ...formModal, name: e.target.value })}
-										error={!_.isUndefined(captionsModal?.name) ? true : false}
-										helperText={captionsModal?.name}
-										label="Name"
-									/>
-								</Grid>
-								<Grid item>
-									<FormControl sx={{ width: 418 }}>
-										<InputLabel
-											id="select-permissions-label"
-											sx={{
-												top:
-													_.isUndefined(formModal.permissions) ||
-													_.isEmpty(formModal.permissions)
-														? -9
-														: 0,
-												"&.Mui-focused": {
-													top: 0
-												}
-											}}
-										>
-											Permissions
-										</InputLabel>
-										<Select
-											labelId="select-permissions-label"
-											label="Permissions"
-											value={formModal.permissions as number[]}
-											multiple
-											onChange={(e) =>
-												setFormModal({ ...formModal, permissions: e.target.value as number[] })
-											}
-											sx={{
-												height: 36
-											}}
-											renderValue={(selected) =>
-												selected.map((id) => permissionNames[id]).join(", ")
-											}
-										>
-											{permissionsData.map((permission) => {
-												return (
-													<MenuItem key={permission.id} value={permission.id}>
-														<Checkbox
-															checked={
-																_.isUndefined(formModal.permissions)
-																	? false
-																	: (formModal.permissions as number[]).includes(
-																			permission.id
-																	  )
-															}
-														/>
-														<ListItemText primary={permission.name} />
-													</MenuItem>
-												);
-											})}
-										</Select>
-									</FormControl>
-								</Grid>
-							</Grid>
-						)}
-					</CardContent>
-					<CardActions sx={{ justifyContent: "center" }}>
-						<Button
-							variant="outlined"
-							onClick={() => {
-								switch (mode) {
-									case "create":
-										if (validate()) {
-											dispatch(createRole(formModal as Omit<RoleData, "id">)).then(() =>
-												dispatch(getRoles())
-											);
-											performCloseModal();
-										}
-										return;
-									case "edit":
-										if (validate()) {
-											dispatch(editRole(formModal)).then(() => dispatch(getRoles()));
-										}
-										break;
-									case "delete":
-										dispatch(deleteRole({ id: formModal.id as number })).then(() =>
-											dispatch(getRoles())
-										);
-										break;
-								}
-								performCloseModal();
-							}}
-							endIcon={
-								mode === "create" ? (
-									<AddCircleOutlined />
-								) : mode === "edit" ? (
-									<EditOutlined />
-								) : (
-									<DeleteOutlined />
-								)
-							}
-						>
-							{mode === "create" ? "Create" : mode === "edit" ? "Edit" : "Delete"}
-						</Button>
+	tableCells[2] = {
+		...tableCells[2],
+		mapper: (data) => (
+			<IconButton onClick={() => performOpenDialog(data.permissions as PermissionData[])}>
+				<ReadMoreOutlined />
+			</IconButton>
+		)
+	};
 
-						<Button
-							variant="outlined"
-							onClick={() => {
-								performCloseModal();
-							}}
-							endIcon={<CancelOutlined />}
-						>
-							Cancel
-						</Button>
-					</CardActions>
-				</Card>
-			</Modal>
+	return (
+		<>
 			<Dialog open={openDialog} onClose={performCloseDialog}>
 				<DialogTitle>Permissions</DialogTitle>
-				<List>
-					{showingPermissions.map((permission) => (
-						<ListItem>
-							<ListItemText primary={permission.name} />
-						</ListItem>
-					))}
-				</List>
+				<DialogContent sx={{ display: "flex", flexWrap: "wrap" }}>
+					{_.isEmpty(permissions) ? (
+						<Typography>None</Typography>
+					) : (
+						permissions.map((permission) => (
+							<Chip
+								color={getColor(permission)}
+								label={permission.name}
+								sx={{ flex: "1 0 21%", m: 0.4 }}
+							/>
+						))
+					)}
+				</DialogContent>
 			</Dialog>
-			<Paper>
-				<Toolbar sx={{ alignContent: "center" }}>
-					<Button
-						fullWidth
-						onClick={() => performOpenModal("create", {})}
-						variant="outlined"
-						endIcon={<AddCircleOutlined />}
-					>
-						Create
-					</Button>
-				</Toolbar>
-				<TableContainer component={Paper}>
-					<Table sx={{ minWidth: { md: 300 } }} size="small">
-						<TableHead>
-							<TableRow>
-								{tableCells.map((cell) => {
-									return (
-										<TableCell sx={{ fontWeight: 600 }} align="center" variant="head">
-											{cell.label}
-										</TableCell>
-									);
-								})}
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							{data.map((row) => {
-								return (
-									<TableRow
-										hover
-										key={row.id}
-										sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-									>
-										<TableCell align="center">{row.id}</TableCell>
-										<TableCell align="center">{row.name}</TableCell>
-										<TableCell align="center">
-											<IconButton
-												onClick={() => performOpenDialog(row.permissions as PermissionData[])}
-											>
-												<ReadMoreOutlined />
-											</IconButton>
-										</TableCell>
-										<TableCell align="center">
-											<IconButton onClick={() => performOpenModal("edit", row)}>
-												<EditOutlined />
-											</IconButton>
-											<IconButton onClick={() => performOpenModal("delete", row)}>
-												<DeleteOutlined />
-											</IconButton>
-										</TableCell>
-									</TableRow>
-								);
-							})}
-						</TableBody>
-					</Table>
-				</TableContainer>
-			</Paper>
-		</Box>
+			<StyledTableForm
+				name="Year"
+				data={data}
+				formContent={
+					<Grid container direction="column" spacing={2}>
+						<Grid item>
+							<StyledTextField
+								fullWidth
+								value={form.name}
+								onChange={(e) => setForm({ ...form, name: e.target.value })}
+								error={!_.isUndefined(captions?.name) ? true : false}
+								helperText={captions?.name}
+								placeholder="IT Role"
+								label="Name"
+							/>
+						</Grid>
+						<Grid item>
+							<Autocomplete
+								fullWidth
+								multiple
+								value={form.permissions as PermissionData[]}
+								options={permissionsData}
+								disableCloseOnSelect
+								getOptionLabel={(option) => option.name}
+								renderInput={(params) => <StyledTextField label="Permissions" {...params} />}
+								renderOption={(props, option, { selected }) => (
+									<li {...props}>
+										<Checkbox
+											icon={<CheckBoxOutlineBlank fontSize="small" />}
+											checkedIcon={<CheckBox fontSize="small" />}
+											style={{ marginRight: 8 }}
+											checked={selected}
+										/>
+										{option.name}
+									</li>
+								)}
+								limitTags={8}
+								onChange={(e, value) => {
+									setForm({
+										...form,
+										permissions: _.sortBy(value, (v) => v.name[0])
+									});
+								}}
+								renderTags={(value, getTagProps) => {
+									return value.map((v, index) => (
+										<Chip {...getTagProps({ index })} label={v.name} color={getColor(v)} />
+									));
+								}}
+							/>
+						</Grid>
+					</Grid>
+				}
+				tableCellMappers={tableCells}
+				tableOverlay={status === "pending" ? "loading" : _.isEmpty(data) ? "empty" : "none"}
+				onFormOpen={(data) => {
+					setForm(data);
+				}}
+				onFormClose={() => {
+					setCaptions({});
+				}}
+				onFormCreate={(shouldClose, { page, pageLimit }) => {
+					if (validate()) {
+						dispatch(
+							createRole({
+								...form,
+								permissions: (form.permissions as PermissionData[])?.map((p) => p.id)
+							} as Omit<RoleData, "id">)
+						).then(() => dispatch(getRoles({ page, pageLimit })));
+						shouldClose();
+					}
+				}}
+				onFormEdit={(shouldClose, { page, pageLimit }) => {
+					if (validate()) {
+						dispatch(
+							editRole({ ...form, permissions: (form.permissions as PermissionData[])?.map((p) => p.id) })
+						).then(() => dispatch(getRoles({ page, pageLimit })));
+						shouldClose();
+					}
+				}}
+				onFormDelete={(shouldClose, { page, pageLimit }) => {
+					dispatch(deleteRole({ id: form.id as number })).then(() => dispatch(getRoles({ page, pageLimit })));
+					shouldClose();
+				}}
+				onTablePagination={({ page, pageLimit }) => {
+					dispatch(getRoles({ page, pageLimit }));
+				}}
+			/>
+		</>
 	);
 }

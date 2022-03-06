@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, TextField, Grid, CircularProgress, Typography } from "@mui/material";
+import { Box, Button, Grid, CircularProgress, Typography } from "@mui/material";
+import { AssignmentIndRounded } from "@mui/icons-material";
 import { RootState, loginToAccount } from "@app/redux";
 import { isTokenExpired, isEmail } from "@app/utils";
+import { StyledTextField } from "@app/components";
 import _ from "lodash";
 
 interface Captions {
@@ -49,22 +51,34 @@ export function LoginPage() {
 			direction="column"
 			alignItems="center"
 			justifyContent="center"
-			style={{ minHeight: "100vh" }}
+			sx={{ minHeight: "100vh" }}
 		>
 			<Grid item>
-				<Typography variant="h4">Login</Typography>
+				<AssignmentIndRounded
+					htmlColor="rgb(80, 72, 229)"
+					sx={{
+						width: "3em",
+						height: "3em"
+					}}
+				/>
 			</Grid>
+			<Grid item>
+				<Typography variant="h3">Login</Typography>
+			</Grid>
+			<Grid item />
 			<Grid item>
 				<Box
 					sx={{
-						width: 300,
-						border: "1px dashed grey",
-						p: 5
+						width: 400,
+						p: 5,
+						borderRadius: 5,
+						boxShadow:
+							"rgba(145, 158, 171, 0.25) 0px 0px 3px 0px, rgba(145, 158, 171, 0.12) 0px 12px 24px -4px"
 					}}
 				>
 					<Grid container spacing={3} direction="column">
 						<Grid item>
-							<TextField
+							<StyledTextField
 								fullWidth
 								type="email"
 								label="Email"
@@ -73,22 +87,13 @@ export function LoginPage() {
 								onChange={(e) => setEmail(e.target.value)}
 								InputProps={{
 									sx: {
-										borderRadius: 0,
-										height: 35
-									}
-								}}
-								InputLabelProps={{
-									sx: {
-										top: !_.isEmpty(email) ? 0 : -9,
-										"&.Mui-focused": {
-											top: 0
-										}
+										height: 36
 									}
 								}}
 							/>
 						</Grid>
 						<Grid item>
-							<TextField
+							<StyledTextField
 								fullWidth
 								type="password"
 								label="Password"
@@ -97,27 +102,22 @@ export function LoginPage() {
 								onChange={(e) => setPassword(e.target.value)}
 								InputProps={{
 									sx: {
-										borderRadius: 0,
-										height: 35
+										height: 36
 									}
 								}}
-								InputLabelProps={{
-									sx: {
-										top: !_.isEmpty(password) ? 0 : -9,
-										"&.Mui-focused": {
-											top: 0
-										}
-									}
-								}}
-							>
-								Password
-							</TextField>
+							/>
 						</Grid>
 						<Grid item>
 							<Button
 								fullWidth
 								type="submit"
 								variant="contained"
+								sx={{
+									backgroundColor: "rgb(80, 72, 229)",
+									"&:hover": {
+										backgroundColor: "rgb(56, 50, 160)"
+									}
+								}}
 								onClick={() => {
 									if (validate()) {
 										if (status === "idle") {
@@ -129,7 +129,7 @@ export function LoginPage() {
 								{status === "pending" ? (
 									<CircularProgress size={24} sx={{ color: "white" }} />
 								) : (
-									"Submit"
+									"Login"
 								)}
 							</Button>
 						</Grid>

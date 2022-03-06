@@ -24,7 +24,7 @@ import {
 	LogoutRounded,
 	TagRounded,
 	CalendarTodayRounded,
-	CorporateFareRounded,
+	ApartmentRounded,
 	PersonRounded,
 	GroupRounded
 } from "@mui/icons-material";
@@ -71,7 +71,7 @@ const menuItems = [
 			},
 			{
 				name: "Department",
-				icon: <CorporateFareRounded />
+				icon: <ApartmentRounded />
 			},
 			{
 				name: "User",
@@ -91,10 +91,10 @@ export function HomePage() {
 	const dispatch = useDispatch();
 	const { token } = useSelector((state: RootState) => state.auth);
 	const [openDrawer, setOpenDrawer] = useState(false);
-	const [selectedCategory, setSelectedCategory] = useState(menuItems[1].header);
-	const [selectedItem, setSelectedItem] = useState(menuItems[1].items[2].name);
+	const [selectedCategory, setSelectedCategory] = useState(menuItems[0].header);
+	const [selectedItem, setSelectedItem] = useState(menuItems[0].items[1].name);
 	const mediaQueries = {
-		sm: useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"))
+		md: useMediaQuery((theme: Theme) => theme.breakpoints.up("md"))
 	};
 
 	const toggleDrawer = () => {
@@ -113,7 +113,7 @@ export function HomePage() {
 	};
 
 	useEffect(() => {
-		if (mediaQueries.sm) {
+		if (mediaQueries.md) {
 			setOpenDrawer(false);
 		}
 		navigate(`/${selectedItem.toLowerCase()}`);
@@ -130,8 +130,8 @@ export function HomePage() {
 		<Box display="flex">
 			<AppBar
 				sx={{
-					width: { sm: `calc(100% - ${drawerWidth}px)` },
-					ml: { sm: `${drawerWidth}px` },
+					width: { md: `calc(100% - ${drawerWidth}px)` },
+					ml: { md: `${drawerWidth}px` },
 					backgroundColor: "rgba(255, 255, 255, 0.7)",
 					backdropFilter: "blur(20px)",
 					boxShadow: "none",
@@ -139,7 +139,7 @@ export function HomePage() {
 				}}
 			>
 				<Toolbar>
-					<IconButton edge="start" onClick={toggleDrawer} sx={{ mr: 2, display: { sm: "none" } }}>
+					<IconButton edge="start" onClick={toggleDrawer} sx={{ mr: 2, display: { md: "none" } }}>
 						<MenuOutlined />
 					</IconButton>
 					<Typography
@@ -163,10 +163,10 @@ export function HomePage() {
 					</IconButton>
 				</Toolbar>
 			</AppBar>
-			<Box width={{ sm: drawerWidth }} flexShrink={{ sm: 0 }}>
+			<Box width={{ md: drawerWidth }} flexShrink={{ md: 0 }}>
 				<Drawer
-					variant={mediaQueries.sm ? "permanent" : "temporary"}
-					open={mediaQueries.sm ? true : openDrawer}
+					variant={mediaQueries.md ? "permanent" : "temporary"}
+					open={mediaQueries.md ? true : openDrawer}
 					onClose={toggleDrawer}
 					ModalProps={{
 						keepMounted: true
@@ -174,6 +174,8 @@ export function HomePage() {
 					PaperProps={{
 						sx: {
 							width: drawerWidth
+							// backgroundColor: "rgb(30, 41, 58)"
+							// backgroundColor: "rgb(17, 24, 39)"
 						}
 					}}
 				>
@@ -189,6 +191,7 @@ export function HomePage() {
 										color: "#555559",
 										fontSize: "0.780rem",
 										fontWeight: 700
+										// backgroundColor: "rgb(17, 24, 39)"
 									}}
 								>
 									{list.header.toUpperCase()}
@@ -210,17 +213,20 @@ export function HomePage() {
 										sx={{
 											mb: 1,
 											borderRadius: 2.5,
+
 											"&.Mui-selected": {
 												backgroundColor: "rgba(0, 0, 0, 0.04)",
 												"&:hover": {
 													backgroundColor: "rgba(0, 0, 0, 0.04)"
 												},
 												".MuiTypography-root": {
-													color: "#0072E5",
+													// color: "#0072E5",
+													color: "rgb(80, 72, 229)",
 													fontWeight: 500
 												},
 												".MuiSvgIcon-root": {
-													fill: "#0072E5"
+													fill: "rgb(80, 72, 229)"
+													// fill: "#0072E5"
 												}
 											}
 										}}
@@ -232,6 +238,7 @@ export function HomePage() {
 												".MuiSvgIcon-root": {
 													width: "0.8em",
 													height: "0.8em"
+													// fill: "rgba(238, 238, 238, 0.7)"
 												}
 											}}
 										>
@@ -239,7 +246,10 @@ export function HomePage() {
 										</ListItemIcon>
 										<ListItemText
 											primaryTypographyProps={{
-												sx: { color: "rgba(0, 0, 0, 0.75)" }
+												sx: {
+													color: "rgba(0, 0, 0, 0.75)"
+													// color: "rgba(238, 238, 238, 0.7)"
+												}
 											}}
 											primary={item.name}
 										/>

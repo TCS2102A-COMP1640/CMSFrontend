@@ -1,31 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
-import {
-	Table,
-	TableHead,
-	TableBody,
-	TableCell,
-	TableRow,
-	TableContainer,
-	Paper,
-	Box,
-	Grid,
-	Toolbar,
-	Button,
-	IconButton,
-	Card,
-	TextField,
-	CardContent,
-	CardActions,
-	Modal,
-	Typography,
-	FormControl,
-	Select,
-	MenuItem,
-	InputLabel,
-	FormHelperText
-} from "@mui/material";
-import { AddCircleOutlined, EditOutlined, DeleteOutlined, CancelOutlined } from "@mui/icons-material";
+import { Grid, Typography, Autocomplete } from "@mui/material";
 import {
 	RootState,
 	useAppDispatch,
@@ -34,34 +9,46 @@ import {
 	createUser,
 	editUser,
 	deleteUser,
-	getRoles,
-	getDepartments,
+	getRolesByName,
 	RoleData,
-	DepartmentData
+	DepartmentData,
+	getDepartmentsByName
 } from "@app/redux";
 import _ from "lodash";
+import { StyledTextField, StyledTableForm } from "@app/components";
+import { isEmail, TableCellMapper } from "@app/utils";
 
-const tableCells = [
+const tableCells: TableCellMapper<UserData>[] = [
 	{
-		label: "ID"
+		label: "ID",
+		align: "center",
+		width: "5%",
+		mapper: (data) => _.toString(data.id)
 	},
 	{
-		label: "Email"
+		label: "Name",
+		align: "left",
+		width: "10%",
+		mapper: (data) => (
+			<>
+				<Typography>
+					{data.firstName} {data.lastName}
+				</Typography>
+				<Typography sx={{ color: "GrayText", fontSize: "13px" }}>{data.email}</Typography>
+			</>
+		)
 	},
 	{
-		label: "First Name"
+		label: "Role",
+		align: "center",
+		width: "5%",
+		mapper: (data) => (data.role as RoleData).name
 	},
 	{
-		label: "Last Name"
-	},
-	{
-		label: "Role"
-	},
-	{
-		label: "Department"
-	},
-	{
-		label: "Actions"
+		label: "Department",
+		align: "center",
+		width: "5%",
+		mapper: (data) => (data.department as DepartmentData)?.name ?? "Unassigned"
 	}
 ];
 
@@ -75,303 +62,196 @@ interface Captions {
 
 export function UserPage() {
 	const dispatch = useAppDispatch();
-	const { data: usersData } = useSelector((state: RootState) => state.users.getUsers);
-	const { data: rolesData } = useSelector((state: RootState) => state.roles.getRoles);
-	const { data: departmentsData } = useSelector((state: RootState) => state.departments.getDepartments);
-	const [mode, setMode] = useState<"create" | "edit" | "delete">("create");
-	const [openModal, setOpenModal] = useState(false);
-	const [formModal, setFormModal] = useState<Partial<UserData>>({});
-	const [captionsModal, setCaptionsModal] = useState<Captions>();
+	const { data: usersData, status: usersStatus } = useSelector((state: RootState) => state.users.getUsers);
+	const { data: rolesData, status: rolesStatus } = useSelector((state: RootState) => state.roles.getRolesByName);
+	const { data: departmentsData, status: departmentsStatus } = useSelector(
+		(state: RootState) => state.departments.getDepartmentsByName
+	);
+	const [form, setForm] = useState<Partial<UserData>>({});
+	const [captions, setCaptions] = useState<Captions>();
 
-	useEffect(() => {
-		dispatch(getUsers());
-		dispatch(getRoles());
-		dispatch(getDepartments());
-	}, []);
+	const getDepartmentsBySearch = useMemo(
+		() =>
+			_.throttle((name) => {
+				dispatch(getDepartmentsByName({ name }));
+			}, 200),
+		[]
+	);
+	const getRolesBySearch = useMemo(
+		() =>
+			_.throttle((name) => {
+				dispatch(getRolesByName({ name }));
+			}, 200),
+		[]
+	);
 
-	const validate = () => {
+	const validate = (mode: string) => {
 		const captions: Captions = {};
 
-		if (_.isEmpty(formModal.email)) {
-			captions.email = "Please enter a name";
+		if (_.isEmpty(form.email) || !isEmail(form.email ?? "")) {
+			captions.email = "Please enter valid email";
 		}
 
-		if (_.isEmpty(formModal.password) && mode === "create") {
+		if (_.isEmpty(form.password) && mode === "create") {
 			captions.password = "Please enter a valid password";
 		}
 
-		if (_.isEmpty(formModal.firstName)) {
+		if (_.isEmpty(form.firstName)) {
 			captions.firstName = "Please enter your first name";
 		}
 
-		if (_.isEmpty(formModal.lastName)) {
+		if (_.isEmpty(form.lastName)) {
 			captions.lastName = "Please enter your last name";
 		}
 
-		if (_.isUndefined(formModal.role)) {
+		if (_.isUndefined(form.role)) {
 			captions.role = "Please choose a role";
 		}
 
-		setCaptionsModal(captions);
+		setCaptions(captions);
 
 		return _.isEmpty(captions) ? true : false;
 	};
 
-	const performOpenModal = (mode: "create" | "edit" | "delete", row: Partial<UserData>) => {
-		setMode(mode);
-		setFormModal({
-			...row,
-			role: _.get(row, ["role", "id"], undefined),
-			department: _.get(row, ["department", "id"], undefined)
-		});
-		setOpenModal(true);
-	};
-	const performCloseModal = () => {
-		setFormModal({});
-		setOpenModal(false);
-		setCaptionsModal({});
-	};
-
 	return (
-		<Box px={{ sm: 0, md: 7 }}>
-			<Modal open={openModal} onClose={performCloseModal}>
-				<Card
-					sx={{
-						minWidth: { xs: 310, sm: 450 },
-						position: "absolute",
-						top: "50%",
-						left: "50%",
-						transform: "translate(-50%, -50%)"
-					}}
-				>
-					<CardContent>
-						{mode === "delete" ? (
-							<Typography textAlign="center" variant="h6">
-								Confirmation
-							</Typography>
-						) : (
-							<Grid container direction="column" spacing={2}>
-								<Grid item>
-									<TextField
-										fullWidth
-										value={formModal.email}
-										onChange={(e) => setFormModal({ ...formModal, email: e.target.value })}
-										error={!_.isUndefined(captionsModal?.email) ? true : false}
-										helperText={captionsModal?.email}
-										label="Email"
-									/>
-								</Grid>
-								<Grid item>
-									<TextField
-										fullWidth
-										value={formModal.firstName}
-										onChange={(e) => setFormModal({ ...formModal, firstName: e.target.value })}
-										error={!_.isUndefined(captionsModal?.firstName) ? true : false}
-										helperText={captionsModal?.firstName}
-										label="First name"
-									/>
-								</Grid>
-								<Grid item>
-									<TextField
-										fullWidth
-										value={formModal.lastName}
-										onChange={(e) => setFormModal({ ...formModal, lastName: e.target.value })}
-										error={!_.isUndefined(captionsModal?.lastName) ? true : false}
-										helperText={captionsModal?.lastName}
-										label="Last name"
-									/>
-								</Grid>
-								<Grid item>
-									<TextField
-										fullWidth
-										type="password"
-										value={formModal.password}
-										onChange={(e) => setFormModal({ ...formModal, password: e.target.value })}
-										error={!_.isUndefined(captionsModal?.password) ? true : false}
-										helperText={captionsModal?.password}
-										label="Password"
-									/>
-								</Grid>
-								<Grid item>
-									<FormControl fullWidth>
-										<InputLabel
-											id="select-role-label"
-											sx={{
-												top: _.isUndefined(formModal.role) ? -9 : 0,
-												"&.Mui-focused": {
-													top: 0
-												}
-											}}
-										>
-											Role
-										</InputLabel>
-										<Select
-											labelId="select-role-label"
-											label="Role"
-											value={formModal.role}
-											error={!_.isUndefined(captionsModal?.role) ? true : false}
-											onChange={(e) =>
-												setFormModal({ ...formModal, role: e.target.value as number })
-											}
-											sx={{
-												height: 36
-											}}
-										>
-											{rolesData.map((role) => {
-												return (
-													<MenuItem key={role.id} value={role.id}>
-														{role.name}
-													</MenuItem>
-												);
-											})}
-										</Select>
-										<FormHelperText error={!_.isUndefined(captionsModal?.role) ? true : false}>
-											{captionsModal?.role}
-										</FormHelperText>
-									</FormControl>
-								</Grid>
-								<Grid item>
-									<FormControl fullWidth>
-										<InputLabel id="select-department-label">Department</InputLabel>
-										<Select
-											labelId="select-department-label"
-											label="Department"
-											value={_.isUndefined(formModal.department) ? -1 : formModal.department}
-											onChange={(e) =>
-												setFormModal({
-													...formModal,
-													department:
-														(e.target.value as number) === -1
-															? undefined
-															: (e.target.value as number)
-												})
-											}
-											sx={{
-												height: 36
-											}}
-										>
-											<MenuItem key={-1} value={-1}>
-												Unassigned
-											</MenuItem>
-											{departmentsData.map((department) => {
-												return (
-													<MenuItem key={department.id} value={department.id}>
-														{department.name}
-													</MenuItem>
-												);
-											})}
-										</Select>
-									</FormControl>
-								</Grid>
-							</Grid>
-						)}
-					</CardContent>
-					<CardActions sx={{ justifyContent: "center" }}>
-						<Button
-							variant="outlined"
-							onClick={() => {
-								switch (mode) {
-									case "create":
-										if (validate()) {
-											dispatch(createUser(formModal as Omit<UserData, "id">)).then(() =>
-												dispatch(getUsers())
-											);
-											performCloseModal();
-										}
-										return;
-									case "edit":
-										if (validate()) {
-											dispatch(editUser(formModal)).then(() => dispatch(getUsers()));
-										}
-										break;
-									case "delete":
-										dispatch(deleteUser({ id: formModal.id as number })).then(() =>
-											dispatch(getUsers())
-										);
-										break;
-								}
-								performCloseModal();
+		<StyledTableForm
+			name="User"
+			data={usersData}
+			formContent={
+				<Grid container direction="row" spacing={2}>
+					<Grid item xs={6}>
+						<StyledTextField
+							fullWidth
+							value={form.firstName}
+							onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+							error={!_.isUndefined(captions?.firstName) ? true : false}
+							helperText={captions?.firstName}
+							label="First name"
+						/>
+					</Grid>
+					<Grid item xs={6}>
+						<StyledTextField
+							fullWidth
+							value={form.lastName}
+							onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+							error={!_.isUndefined(captions?.lastName) ? true : false}
+							helperText={captions?.lastName}
+							label="Last name"
+						/>
+					</Grid>
+					<Grid item xs={6}>
+						<StyledTextField
+							fullWidth
+							value={form.email}
+							onChange={(e) => setForm({ ...form, email: e.target.value })}
+							error={!_.isUndefined(captions?.email) ? true : false}
+							helperText={captions?.email}
+							label="Email"
+						/>
+					</Grid>
+					<Grid item xs={6}>
+						<StyledTextField
+							fullWidth
+							type="password"
+							value={form.password}
+							onChange={(e) => setForm({ ...form, password: e.target.value })}
+							error={!_.isUndefined(captions?.password) ? true : false}
+							helperText={captions?.password}
+							label="Password"
+						/>
+					</Grid>
+					<Grid item xs={6}>
+						<Autocomplete
+							fullWidth
+							value={form.department as DepartmentData}
+							options={departmentsData}
+							filterSelectedOptions
+							autoComplete
+							filterOptions={(options) => options}
+							getOptionLabel={(option) => option.name}
+							loading={departmentsStatus === "pending"}
+							renderInput={(params) => <StyledTextField label="Department" {...params} />}
+							onChange={(e, value) => {
+								setForm({
+									...form,
+									department: _.isNull(value) ? undefined : (value as DepartmentData)
+								});
 							}}
-							endIcon={
-								mode === "create" ? (
-									<AddCircleOutlined />
-								) : mode === "edit" ? (
-									<EditOutlined />
-								) : (
-									<DeleteOutlined />
-								)
-							}
-						>
-							{mode === "create" ? "Create" : mode === "edit" ? "Edit" : "Delete"}
-						</Button>
-
-						<Button
-							variant="outlined"
-							onClick={() => {
-								performCloseModal();
+							onInputChange={(e, value) => {
+								getDepartmentsBySearch(value);
 							}}
-							endIcon={<CancelOutlined />}
-						>
-							Cancel
-						</Button>
-					</CardActions>
-				</Card>
-			</Modal>
-			<Paper>
-				<Toolbar sx={{ alignContent: "center" }}>
-					<Button
-						fullWidth
-						onClick={() => performOpenModal("create", {})}
-						variant="outlined"
-						endIcon={<AddCircleOutlined />}
-					>
-						Create
-					</Button>
-				</Toolbar>
-				<TableContainer component={Paper}>
-					<Table sx={{ minWidth: { md: 300 } }} size="small">
-						<TableHead>
-							<TableRow>
-								{tableCells.map((cell) => {
-									return (
-										<TableCell sx={{ fontWeight: 600 }} align="center" variant="head">
-											{cell.label}
-										</TableCell>
-									);
-								})}
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							{usersData.map((row) => {
-								return (
-									<TableRow
-										hover
-										key={row.id}
-										sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-									>
-										<TableCell align="center">{row.id}</TableCell>
-										<TableCell align="center">{row.email}</TableCell>
-										<TableCell align="center">{row.firstName}</TableCell>
-										<TableCell align="center">{row.lastName}</TableCell>
-										<TableCell align="center">{(row.role as RoleData).name}</TableCell>
-										<TableCell align="center">
-											{(row.department as DepartmentData)?.name ?? "Unassigned"}
-										</TableCell>
-										<TableCell align="center">
-											<IconButton onClick={() => performOpenModal("edit", row)}>
-												<EditOutlined />
-											</IconButton>
-											<IconButton onClick={() => performOpenModal("delete", row)}>
-												<DeleteOutlined />
-											</IconButton>
-										</TableCell>
-									</TableRow>
-								);
-							})}
-						</TableBody>
-					</Table>
-				</TableContainer>
-			</Paper>
-		</Box>
+						/>
+					</Grid>
+					<Grid item xs={6}>
+						<Autocomplete
+							fullWidth
+							value={form.role as RoleData}
+							options={rolesData}
+							filterSelectedOptions
+							autoComplete
+							filterOptions={(options) => options}
+							getOptionLabel={(option) => option.name}
+							loading={rolesStatus === "pending"}
+							renderInput={(params) => (
+								<StyledTextField
+									label="Role"
+									error={!_.isUndefined(captions?.role) ? true : false}
+									helperText={captions?.role}
+									{...params}
+								/>
+							)}
+							onChange={(e, value) => {
+								setForm({
+									...form,
+									role: _.isNull(value) ? undefined : (value as RoleData)
+								});
+							}}
+							onInputChange={(e, value) => {
+								getRolesBySearch(value);
+							}}
+						/>
+					</Grid>
+				</Grid>
+			}
+			tableCellMappers={tableCells}
+			tableOverlay={usersStatus === "pending" ? "loading" : _.isEmpty(usersData) ? "empty" : "none"}
+			onFormOpen={(data) => {
+				setForm(data);
+			}}
+			onFormClose={() => {
+				setCaptions({});
+			}}
+			onFormCreate={(shouldClose, { page, pageLimit, mode }) => {
+				if (validate(mode)) {
+					dispatch(
+						createUser({
+							...form,
+							role: (form.role as RoleData)?.id,
+							department: (form.department as DepartmentData)?.id
+						} as Omit<UserData, "id">)
+					).then(() => dispatch(getUsers({ page, pageLimit })));
+					shouldClose();
+				}
+			}}
+			onFormEdit={(shouldClose, { page, pageLimit, mode }) => {
+				if (validate(mode)) {
+					dispatch(
+						editUser({
+							...form,
+							role: (form.role as RoleData)?.id,
+							department: (form.department as DepartmentData)?.id
+						})
+					).then(() => dispatch(getUsers({ page, pageLimit })));
+					shouldClose();
+				}
+			}}
+			onFormDelete={(shouldClose, { page, pageLimit }) => {
+				dispatch(deleteUser({ id: form.id as number })).then(() => dispatch(getUsers({ page, pageLimit })));
+				shouldClose();
+			}}
+			onTablePagination={({ page, pageLimit }) => {
+				dispatch(getUsers({ page, pageLimit }));
+			}}
+		/>
 	);
 }

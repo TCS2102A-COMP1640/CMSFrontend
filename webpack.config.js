@@ -106,7 +106,7 @@ module.exports = {
 		!isProduction && new ReactRefreshWebpackPlugin()
 	].filter(Boolean),
 	devServer: {
-		static: path.resolve(__dirname, "src"),
+		static: path.resolve(__dirname, "src", "assets"),
 		historyApiFallback: true,
 		hot: true
 	},

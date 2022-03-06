@@ -1,11 +1,11 @@
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
-import { APIPaths, fetchHandler } from "@app/utils";
+import { APIPaths, fetchHandler, PaginationPayload } from "@app/utils";
 import { DepartmentData } from "./interfaces";
 import _ from "lodash";
 
 export const resetDepartmentsState = createAction("departments/reset");
 
-export const getDepartments = createAsyncThunk<DepartmentData[], { page: number; pageLimit: number }>(
+export const getDepartments = createAsyncThunk<DepartmentData[], PaginationPayload>(
 	"departments/getDepartments",
 	async (payload, { rejectWithValue, getState }) => {
 		const {
@@ -13,6 +13,22 @@ export const getDepartments = createAsyncThunk<DepartmentData[], { page: number;
 		} = getState();
 		const { data, error } = <{ data: DepartmentData[]; error?: Error }>(
 			await fetchHandler({ path: APIPaths.Departments, method: "GET", query: payload, token })
+		);
+		if (_.isNil(error)) {
+			return data;
+		}
+		return rejectWithValue(error);
+	}
+);
+
+export const getDepartmentsByName = createAsyncThunk<DepartmentData[], Pick<DepartmentData, "name">>(
+	"departments/getDepartmentsByName",
+	async (payload, { rejectWithValue, getState }) => {
+		const {
+			auth: { token }
+		} = getState();
+		const { data, error } = <{ data: DepartmentData[]; error?: Error }>(
+			await fetchHandler({ path: `${APIPaths.Departments}/:name`, method: "GET", params: payload, token })
 		);
 		if (_.isNil(error)) {
 			return data;

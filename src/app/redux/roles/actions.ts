@@ -1,24 +1,40 @@
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
-import { APIPaths, fetchHandler } from "@app/utils";
+import { APIPaths, fetchHandler, PaginationPayload } from "@app/utils";
 import { pushMessage } from "@app/redux";
 import { RoleData } from "./interfaces";
 import _ from "lodash";
 
 export const resetRolesState = createAction("roles/reset");
 
-export const getRoles = createAsyncThunk<RoleData[]>(
+export const getRoles = createAsyncThunk<RoleData[], PaginationPayload>(
 	"roles/getRoles",
 	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
 		const { data, error } = <{ data: RoleData[]; error?: Error }>(
-			await fetchHandler({ path: APIPaths.Roles, method: "GET", token })
+			await fetchHandler({ path: APIPaths.Roles, method: "GET", query: payload, token })
 		);
 		if (_.isNil(error)) {
 			return data;
 		}
 		dispatch(pushMessage({ message: error.message, severity: "error" }));
+		return rejectWithValue(error);
+	}
+);
+
+export const getRolesByName = createAsyncThunk<RoleData[], Pick<RoleData, "name">>(
+	"roles/getRolesByName",
+	async (payload, { rejectWithValue, getState }) => {
+		const {
+			auth: { token }
+		} = getState();
+		const { data, error } = <{ data: RoleData[]; error?: Error }>(
+			await fetchHandler({ path: `${APIPaths.Roles}/:name`, method: "GET", params: payload, token })
+		);
+		if (_.isNil(error)) {
+			return data;
+		}
 		return rejectWithValue(error);
 	}
 );

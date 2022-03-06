@@ -1,10 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { DepartmentsState } from "./interfaces";
-import { getDepartments, createDepartment, editDepartment, deleteDepartment, resetDepartmentsState } from "./actions";
+import {
+	getDepartments,
+	getDepartmentsByName,
+	createDepartment,
+	editDepartment,
+	deleteDepartment,
+	resetDepartmentsState
+} from "./actions";
 import _ from "lodash";
 
 const departmentsState: DepartmentsState = {
 	getDepartments: {
+		data: [],
+		status: "idle"
+	},
+	getDepartmentsByName: {
 		data: [],
 		status: "idle"
 	},
@@ -35,6 +46,17 @@ const departmentsSlice = createSlice({
 			.addCase(getDepartments.fulfilled, (state, action) => {
 				state.getDepartments.status = "idle";
 				state.getDepartments.data = action.payload;
+			})
+			.addCase(getDepartmentsByName.pending, (state, action) => {
+				state.getDepartmentsByName.status = "pending";
+				state.getDepartmentsByName.error = undefined;
+			})
+			.addCase(getDepartmentsByName.rejected, (state, action) => {
+				state.getDepartmentsByName.status = "idle";
+			})
+			.addCase(getDepartmentsByName.fulfilled, (state, action) => {
+				state.getDepartmentsByName.status = "idle";
+				state.getDepartmentsByName.data = action.payload;
 			})
 			.addCase(createDepartment.pending, (state, action) => {
 				state.createDepartment.status = "pending";

@@ -1,10 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { RolesState } from "./interfaces";
-import { getRoles, createRole, editRole, deleteRole, resetRolesState } from "./actions";
+import { getRoles, getRolesByName, createRole, editRole, deleteRole, resetRolesState } from "./actions";
 import _ from "lodash";
 
 const rolesState: RolesState = {
 	getRoles: {
+		data: [],
+		status: "idle"
+	},
+	getRolesByName: {
 		data: [],
 		status: "idle"
 	},
@@ -35,6 +39,17 @@ const rolesSlice = createSlice({
 			.addCase(getRoles.fulfilled, (state, action) => {
 				state.getRoles.status = "idle";
 				state.getRoles.data = action.payload;
+			})
+			.addCase(getRolesByName.pending, (state, action) => {
+				state.getRolesByName.status = "pending";
+				state.getRolesByName.error = undefined;
+			})
+			.addCase(getRolesByName.rejected, (state, action) => {
+				state.getRolesByName.status = "idle";
+			})
+			.addCase(getRolesByName.fulfilled, (state, action) => {
+				state.getRolesByName.status = "idle";
+				state.getRolesByName.data = action.payload;
 			})
 			.addCase(createRole.pending, (state, action) => {
 				state.createRole.status = "pending";

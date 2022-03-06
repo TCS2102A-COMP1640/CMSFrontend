@@ -1,19 +1,19 @@
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
-import { APIPaths, fetchHandler } from "@app/utils";
+import { APIPaths, fetchHandler, PaginationPayload } from "@app/utils";
 import { UserData } from "./interfaces";
 import _ from "lodash";
 import { pushMessage } from "..";
 
 export const resetUsersState = createAction("users/reset");
 
-export const getUsers = createAsyncThunk<UserData[]>(
+export const getUsers = createAsyncThunk<UserData[], PaginationPayload>(
 	"users/getUsers",
 	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
 		const { data, error } = <{ data: UserData[]; error?: Error }>(
-			await fetchHandler({ path: APIPaths.Users, method: "GET", token })
+			await fetchHandler({ path: APIPaths.Users, method: "GET", query: payload, token })
 		);
 		if (_.isNil(error)) {
 			return data;

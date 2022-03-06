@@ -1,19 +1,19 @@
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
-import { APIPaths, fetchHandler } from "@app/utils";
+import { APIPaths, fetchHandler, PaginationPayload } from "@app/utils";
 import { pushMessage } from "@app/redux";
 import { CategoryData } from "./interfaces";
 import _ from "lodash";
 
 export const resetCategoriesState = createAction("categories/reset");
 
-export const getCategories = createAsyncThunk<CategoryData[]>(
+export const getCategories = createAsyncThunk<CategoryData[], PaginationPayload>(
 	"categories/getCategories",
 	async (payload, { rejectWithValue, getState, dispatch }) => {
 		const {
 			auth: { token }
 		} = getState();
 		const { data, error } = <{ data: CategoryData[]; error?: Error }>(
-			await fetchHandler({ path: APIPaths.Categories, method: "GET", token })
+			await fetchHandler({ path: APIPaths.Categories, method: "GET", query: payload, token })
 		);
 		if (_.isNil(error)) {
 			return data;

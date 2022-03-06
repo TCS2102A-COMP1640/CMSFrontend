@@ -1,3 +1,5 @@
+import { SxProps, Theme } from "@mui/material";
+import { ReactNode } from "react";
 import _ from "lodash";
 
 export const APITimeout = 10000;
@@ -14,6 +16,19 @@ export const APIPaths = {
 };
 
 export type Status = "idle" | "pending";
+
+export interface PaginationPayload {
+	page: number;
+	pageLimit: number;
+}
+
+export interface TableCellMapper<T> {
+	label: string;
+	align: "center" | "left";
+	width: string;
+	sx?: SxProps<Theme>;
+	mapper?: (value: T) => string | ReactNode;
+}
 
 export interface FetchParams {
 	path: string;

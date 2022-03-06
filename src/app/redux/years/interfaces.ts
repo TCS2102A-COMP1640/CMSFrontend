@@ -20,6 +20,11 @@ export interface YearsState {
 		status: Status;
 		error?: Error;
 	};
+	getYearsByName: {
+		data: YearData[];
+		status: Status;
+		error?: Error;
+	};
 	createYear: {
 		status: Status;
 		error?: Error;

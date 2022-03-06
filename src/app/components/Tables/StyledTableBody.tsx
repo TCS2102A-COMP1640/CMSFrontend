@@ -1,15 +1,16 @@
 import React, { memo } from "react";
 import { Box, CircularProgress, TableBody, TableRow, TableCell, TableBodyProps, Typography } from "@mui/material";
+import { TableCellMapper } from "@app/utils";
 import { InboxOutlined } from "@mui/icons-material";
 import _ from "lodash";
 
 interface StyledTableBodyProps extends TableBodyProps {
 	overlay?: "loading" | "empty" | "none";
-	loadingCellWidths: string[];
+	tableCellMappers: TableCellMapper<any>[];
 }
 
 function StyledTableBodyInternal(props: StyledTableBodyProps) {
-	const { children, overlay, loadingCellWidths, ...bodyProps } = props;
+	const { children, overlay, tableCellMappers, ...bodyProps } = props;
 
 	return (
 		<TableBody {...bodyProps}>
@@ -17,9 +18,9 @@ function StyledTableBodyInternal(props: StyledTableBodyProps) {
 				? _.range(0, 5).map((i) => {
 						return (
 							<TableRow key={i}>
-								{loadingCellWidths.map((width) => {
+								{tableCellMappers.map((mapper) => {
 									return (
-										<TableCell height="45px" width={width}>
+										<TableCell height="45px" width={mapper.width} align={mapper.align}>
 											{i}
 										</TableCell>
 									);

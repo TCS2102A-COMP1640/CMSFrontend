@@ -11,6 +11,11 @@ export interface DepartmentsState {
 		status: Status;
 		error?: Error;
 	};
+	getDepartmentsByName: {
+		data: DepartmentData[];
+		status: Status;
+		error?: Error;
+	};
 	createDepartment: {
 		status: Status;
 		error?: Error;
