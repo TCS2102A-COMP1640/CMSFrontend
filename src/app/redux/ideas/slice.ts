@@ -22,8 +22,6 @@ const ideasSlice = createSlice({
 		builder
 			.addCase(getIdeas.pending, (state, action) => {
 				state.getIdeas.status = "pending";
-				state.getIdeas.data = [];
-				state.getIdeas.pages = 0;
 				state.getIdeas.error = undefined;
 			})
 			.addCase(getIdeas.rejected, (state, action) => {

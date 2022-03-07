@@ -11,6 +11,11 @@ export interface CategoriesState {
 		status: Status;
 		error?: Error;
 	};
+	getCategoriesByName: {
+		data: CategoryData[];
+		status: Status;
+		error?: Error;
+	};
 	createCategory: {
 		status: Status;
 		error?: Error;

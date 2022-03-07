@@ -17,7 +17,12 @@ import {
 	Stack,
 	Menu,
 	Badge,
-	CircularProgress
+	CircularProgress,
+	Button,
+	Dialog,
+	DialogContent,
+	Checkbox,
+	FormControlLabel
 } from "@mui/material";
 import {
 	SendOutlined,
@@ -34,9 +39,10 @@ import {
 	useAppDispatch,
 	getYearsByName,
 	createIdea,
-	getCategories
+	getCategoriesByName,
+	CategoryData
 } from "@app/redux";
-import { Idea, PrimaryButton, StyledTextField } from "@app/components";
+import { Idea, StyledTextField } from "@app/components";
 import _ from "lodash";
 import { APIPaths } from "@app/utils";
 
@@ -96,15 +102,17 @@ export function IdeaPage() {
 	const { token } = useSelector((state: RootState) => state.auth);
 	const { data: yearsData, status: yearsStatus } = useSelector((state: RootState) => state.years.getYearsByName);
 	const { data: categoriesData, status: categoriesStatus } = useSelector(
-		(state: RootState) => state.categories.getCategories
+		(state: RootState) => state.categories.getCategoriesByName
 	);
 	const [page, setPage] = useState(1);
 	const [form, setForm] = useState<Partial<IdeaData>>({});
 	const [captions, setCaptions] = useState<Captions>({});
 
+	const [checked, setChecked] = useState(false);
 	const [filter, setFilter] = useState<Filter | undefined>(undefined);
 	const [filterAnchor, setFilterAnchor] = useState<HTMLElement | undefined>(undefined);
 	const [openFilter, setOpenFilter] = useState(false);
+	const [openDialog, setOpenDialog] = useState(false);
 
 	const getIdeasPaginated = () => {
 		dispatch(
@@ -125,6 +133,14 @@ export function IdeaPage() {
 		[]
 	);
 
+	const getCategoriesBySearch = useMemo(
+		() =>
+			_.throttle((name) => {
+				dispatch(getCategoriesByName({ name }));
+			}, 200),
+		[]
+	);
+
 	const disablePostingIdea = isYearValid(form.academicYear as YearData) !== "valid";
 
 	const mediaQueries = {
@@ -136,6 +152,8 @@ export function IdeaPage() {
 
 		if (_.isEmpty(form.content)) {
 			captions.content = "Please enter your idea here";
+		} else if (!checked) {
+			captions.content = "Please accept Terms and Conditions before posting";
 		}
 
 		setCaptions(captions);
@@ -149,6 +167,30 @@ export function IdeaPage() {
 
 	return (
 		<Grid container direction="column" px={{ xs: 0, sm: 5, md: 15 }} spacing={2}>
+			<Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+				<DialogContent>
+					<Autocomplete
+						value={_.first(form.categories as CategoryData[])}
+						options={categoriesData}
+						filterSelectedOptions
+						autoComplete
+						filterOptions={(options) => options}
+						getOptionLabel={(option) => option.name}
+						loading={categoriesStatus === "pending"}
+						sx={{ minWidth: 200 }}
+						renderInput={(params) => <StyledTextField {...params} label="Category" />}
+						onChange={(e, value) => {
+							setForm({
+								...form,
+								categories: _.isNull(value) ? undefined : [value]
+							});
+						}}
+						onInputChange={(e, value) => {
+							getCategoriesBySearch(value);
+						}}
+					/>
+				</DialogContent>
+			</Dialog>
 			<Grid item width="100%" alignSelf="center">
 				<Grid container spacing={2}>
 					<Grid item sx={{ alignSelf: "center" }}>
@@ -299,35 +341,49 @@ export function IdeaPage() {
 					</CardContent>
 					<CardContent sx={{ py: 0 }}>
 						<Stack direction="row" spacing={1}>
+							{!_.isUndefined(form.categories) &&
+								(form.categories as CategoryData[]).map((cat) => (
+									<Chip
+										color="warning"
+										sx={{
+											height: 24
+										}}
+										onDelete={() => {
+											setForm({
+												...form,
+												categories: undefined
+											});
+										}}
+										label={cat.name}
+									/>
+								))}
 							{!_.isUndefined(form.documents) &&
-								form.documents.map((file) => {
-									return (
-										<Chip
-											sx={{
-												backgroundColor: "rgb(80, 72, 229)",
-												color: "white",
-												height: 24,
-												"& .MuiSvgIcon-root": {
-													fill: "white",
-													"&:hover": {
-														fill: "rgba(255, 255, 255, 0.8)"
-													}
+								form.documents.map((file) => (
+									<Chip
+										sx={{
+											backgroundColor: "rgb(80, 72, 229)",
+											color: "white",
+											height: 24,
+											"& .MuiSvgIcon-root": {
+												fill: "white",
+												"&:hover": {
+													fill: "rgba(255, 255, 255, 0.8)"
 												}
-											}}
-											onDelete={() => {
-												setForm({
-													...form,
-													documents: (form.documents as File[])?.filter((f) => f !== file)
-												});
-											}}
-											label={file.name}
-										/>
-									);
-								})}
+											}
+										}}
+										onDelete={() => {
+											setForm({
+												...form,
+												documents: (form.documents as File[])?.filter((f) => f !== file)
+											});
+										}}
+										label={file.name}
+									/>
+								))}
 						</Stack>
 					</CardContent>
 					<CardActions sx={{ pr: 2 }}>
-						<IconButton disabled={disablePostingIdea} sx={{ ml: 0.1 }}>
+						<IconButton onClick={() => setOpenDialog(true)} disabled={disablePostingIdea} sx={{ ml: 0.1 }}>
 							<LocalOfferOutlined />
 						</IconButton>
 						<IconButton disabled={disablePostingIdea} component="label" sx={{ ml: 1 }}>
@@ -341,8 +397,18 @@ export function IdeaPage() {
 								hidden
 							/>
 						</IconButton>
+						<FormControlLabel
+							disabled={disablePostingIdea}
+							sx={{
+								"& .Mui-checked": {
+									color: "rgb(80, 72, 229) !important"
+								}
+							}}
+							control={<Checkbox checked={checked} onChange={(e, checked) => setChecked(checked)} />}
+							label="I agree to Terms and Conditions"
+						/>
 						<Box flexGrow={1} />
-						<PrimaryButton
+						<Button
 							endIcon={ideasCreateStatus === "idle" ? <SendOutlined /> : undefined}
 							onClick={() => {
 								if (validate()) {
@@ -352,28 +418,20 @@ export function IdeaPage() {
 									});
 								}
 							}}
-							size="small"
-							text={
-								ideasCreateStatus === "idle" ? (
-									"Post"
-								) : (
-									<CircularProgress
-										sx={{ "& .MuiCircularProgress-svg": { color: "white" } }}
-										size={24}
-									/>
-								)
-							}
 							disabled={disablePostingIdea}
-						/>
+							variant="primary"
+						>
+							{ideasCreateStatus === "idle" ? (
+								"Post"
+							) : (
+								<CircularProgress sx={{ "& .MuiCircularProgress-svg": { color: "white" } }} size={24} />
+							)}
+						</Button>
 					</CardActions>
 				</Card>
 			</Grid>
 
-			{ideasStatus === "pending" ? (
-				<Grid item textAlign="center" mt={3}>
-					<LinearProgress />
-				</Grid>
-			) : (
+			{!_.isUndefined(form.academicYear) &&
 				ideasData.map((idea) => {
 					return (
 						<Grid item marginTop={1}>
@@ -384,10 +442,14 @@ export function IdeaPage() {
 							/>
 						</Grid>
 					);
-				})
+				})}
+			{ideasStatus === "pending" && (
+				<Grid item textAlign="center" mt={3}>
+					<LinearProgress />
+				</Grid>
 			)}
 			<Grid item alignSelf="center">
-				{!_.isEmpty(ideasData) && (
+				{!_.isEmpty(ideasData) && !_.isUndefined(form.academicYear) && (
 					<Pagination
 						size={mediaQueries.sm ? "medium" : "small"}
 						count={ideasPages === 0 ? 1 : ideasPages}

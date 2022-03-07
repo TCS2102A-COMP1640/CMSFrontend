@@ -122,3 +122,19 @@ export async function fetchHandler(p: FetchParams) {
 		};
 	}
 }
+
+declare module "@mui/material/Button" {
+	interface ButtonPropsVariantOverrides {
+		primary: true;
+		error: true;
+		edit: true;
+		action: true;
+	}
+}
+
+declare module "@mui/material/SvgIcon" {
+	interface SvgIconPropsColorOverrides {
+		delete: true;
+		edit: true;
+	}
+}

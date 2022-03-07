@@ -1,20 +1,9 @@
 import React, { useState, useEffect, ReactNode } from "react";
-import { Box, Paper, TableContainer, TableHead, TablePagination } from "@mui/material";
-import {
-	EditButtonIcon,
-	DeleteButtonIcon,
-	StyledForm,
-	PrimaryButton,
-	EditButtonText,
-	CancelButtonText,
-	DeleteButtonText,
-	StyledTable,
-	StyledTableBody,
-	StyledTableCell,
-	StyledTableRow
-} from "@app/components";
+import { Box, Button, IconButton, Paper, TableContainer, TableHead, TablePagination } from "@mui/material";
+import { StyledForm, StyledTable, StyledTableBody, StyledTableCell, StyledTableRow } from "@app/components";
 import { TableCellMapper } from "@app/utils";
 import _ from "lodash";
+import { CancelOutlined, CreateOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 
 type FormMode = "create" | "edit" | "delete";
 
@@ -82,10 +71,14 @@ export function StyledTableForm<T>(props: StyledTableFormProps<T>) {
 			mapper: (data) => (
 				<>
 					<Box display="inline-block" p={0.5}>
-						<EditButtonIcon onClick={() => performOpenForm("edit", data)} />
+						<IconButton onClick={() => performOpenForm("edit", data)}>
+							<EditOutlined color="edit" />
+						</IconButton>
 					</Box>
 					<Box display="inline-block" p={0.5}>
-						<DeleteButtonIcon onClick={() => performOpenForm("delete", data)} />
+						<IconButton onClick={() => performOpenForm("delete", data)}>
+							<DeleteOutlined color="delete" />
+						</IconButton>
 					</Box>
 				</>
 			)
@@ -102,35 +95,54 @@ export function StyledTableForm<T>(props: StyledTableFormProps<T>) {
 							mt: 10
 						}
 					}}
-					cardContent={formContent}
+					cardContent={mode === "delete" ? <></> : formContent}
 					cardActions={
 						<>
 							{mode === "create" ? (
-								<PrimaryButton
-									size="medium"
+								<Button
 									onClick={() => {
 										onFormCreate(performCloseForm, { page, pageLimit, mode });
 									}}
-								/>
+									endIcon={<CreateOutlined />}
+									variant="primary"
+									sx={{ minWidth: 110 }}
+								>
+									Create
+								</Button>
 							) : mode === "edit" ? (
-								<EditButtonText
+								<Button
 									onClick={() => {
 										onFormEdit(performCloseForm, { page, pageLimit, mode });
 									}}
-								/>
+									endIcon={<EditOutlined />}
+									variant="edit"
+									sx={{ minWidth: 110 }}
+								>
+									Edit
+								</Button>
 							) : (
-								<DeleteButtonText
+								<Button
 									onClick={() => {
 										onFormDelete(performCloseForm, { page, pageLimit, mode });
 									}}
-								/>
+									endIcon={<DeleteOutlined />}
+									variant="error"
+									sx={{ minWidth: 110 }}
+								>
+									Delete
+								</Button>
 							)}
 							<Box width={20} />
-							<CancelButtonText
+							<Button
 								onClick={() => {
 									performCloseForm();
 								}}
-							/>
+								variant="action"
+								endIcon={<CancelOutlined />}
+								sx={{ minWidth: 110 }}
+							>
+								Cancel
+							</Button>
 						</>
 					}
 				/>
@@ -138,7 +150,15 @@ export function StyledTableForm<T>(props: StyledTableFormProps<T>) {
 				<>
 					<Box py={4} display="flex">
 						<Box flexGrow={1} />
-						<PrimaryButton onClick={() => performOpenForm("create", {})} />
+						<Button
+							onClick={() => {
+								performOpenForm("create", {});
+							}}
+							endIcon={<CreateOutlined />}
+							variant="primary"
+						>
+							Create
+						</Button>
 					</Box>
 					<Paper
 						sx={{

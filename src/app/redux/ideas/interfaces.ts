@@ -43,6 +43,8 @@ export interface IdeaData {
 	categories: number[] | CategoryData[];
 	viewCount: number;
 	reactionScore: number;
+	thumbUpCount: number;
+	thumbDownCount: number;
 	documents: File[] | IdeaDocumentData[];
 	academicYear?: number | YearData;
 	createTimestamp: string | Date;

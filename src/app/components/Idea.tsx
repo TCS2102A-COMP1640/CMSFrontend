@@ -13,9 +13,19 @@ import {
 	useMediaQuery,
 	Tooltip,
 	Divider,
-	Box
+	Box,
+	Badge
 } from "@mui/material";
-import { ThumbUp, ThumbDown, Comment, ExpandMore, SendOutlined, AccessTimeFilled } from "@mui/icons-material";
+import {
+	ThumbUp,
+	ThumbDown,
+	Comment,
+	ExpandMore,
+	SendOutlined,
+	AccessTimeFilled,
+	VisibilityRounded,
+	ReviewsRounded
+} from "@mui/icons-material";
 import {
 	getIdeaComments,
 	CategoryData,
@@ -29,7 +39,7 @@ import {
 	createIdeaReaction,
 	createIdeaView
 } from "@app/redux";
-import { StyledTextField, PrimaryButton } from "@app/components";
+import { StyledTextField } from "@app/components";
 import { format, formatDistance } from "date-fns";
 import _ from "lodash";
 
@@ -48,7 +58,10 @@ function IdeaInternal(props: IdeaProps) {
 			content,
 			categories,
 			documents,
-			createTimestamp
+			createTimestamp,
+			viewCount,
+			thumbUpCount,
+			thumbDownCount
 		},
 		academicYear,
 		disableComment
@@ -90,7 +103,7 @@ function IdeaInternal(props: IdeaProps) {
 			isInitialMount.current = false;
 			getReaction();
 		} else {
-			dispatch(createIdeaReaction({ id, type: reaction })).then(getReaction);
+			dispatch(createIdeaReaction({ id, type: reaction }));
 		}
 	}, [reaction]);
 
@@ -119,6 +132,14 @@ function IdeaInternal(props: IdeaProps) {
 					</Tooltip>
 					{formatDistance(createTimestamp as Date, new Date(), { addSuffix: true })}
 				</Typography>
+				<Typography color="gray" variant="caption">
+					<VisibilityRounded sx={{ width: 16, height: 16, verticalAlign: "text-bottom", pr: 0.7 }} />
+					{viewCount} view{viewCount > 1 ? "s" : ""}
+				</Typography>
+				<Typography color="gray" variant="caption">
+					<ReviewsRounded sx={{ width: 16, height: 16, verticalAlign: "text-bottom", pr: 0.7 }} />
+					{thumbUpCount + thumbDownCount} reaction{thumbUpCount + thumbDownCount > 1 ? "s" : ""}
+				</Typography>
 			</AccordionSummary>
 			<AccordionDetails>
 				<Grid container direction="column">
@@ -130,7 +151,7 @@ function IdeaInternal(props: IdeaProps) {
 						{!_.isEmpty(categories) && (
 							<Stack direction="row" spacing={2}>
 								{categories.map((category) => (
-									<Chip sx={{ height: 18 }} label={(category as CategoryData).name} />
+									<Chip sx={{ height: 18 }} color="warning" label={(category as CategoryData).name} />
 								))}
 							</Stack>
 						)}
@@ -164,15 +185,17 @@ function IdeaInternal(props: IdeaProps) {
 								onClick={() => {
 									setReaction(reaction === 1 ? 0 : 1);
 								}}
+								disabled={disableComment}
 							>
-								<ThumbUp color={reaction === 1 ? "primary" : "inherit"} />
+								<ThumbUp color={reaction === 1 ? "primary" : "action"} />
 							</IconButton>
 							<IconButton
 								onClick={() => {
 									setReaction(reaction === 2 ? 0 : 2);
 								}}
+								disabled={disableComment}
 							>
-								<ThumbDown color={reaction === 2 ? "primary" : "inherit"} />
+								<ThumbDown color={reaction === 2 ? "primary" : "action"} />
 							</IconButton>
 							<IconButton
 								onClick={() => {
@@ -182,22 +205,98 @@ function IdeaInternal(props: IdeaProps) {
 									setOpenComments(!openComments);
 								}}
 							>
-								<Comment color={openComments ? "primary" : "inherit"} />
+								<Badge
+									anchorOrigin={{
+										horizontal: "right",
+										vertical: "bottom"
+									}}
+									invisible={openComments && loadingComments ? false : true}
+									sx={{
+										"& .MuiBadge-badge": {
+											backgroundColor: "white",
+											boxShadow:
+												"rgba(145, 158, 171, 0.8) 0px 0px 3px 0px, rgba(145, 158, 171, 0.8) 0px 12px 24px -4px",
+											top: -3,
+											p: 0
+										}
+									}}
+									badgeContent={
+										<CircularProgress
+											sx={{
+												"& .MuiCircularProgress-svg": {
+													color: "rgb(80, 72, 229)"
+												}
+											}}
+											size={12}
+										/>
+									}
+								>
+									<Comment color={openComments ? "primary" : "action"} />
+								</Badge>
 							</IconButton>
 						</Stack>
 					</Grid>
-					<Grid item alignSelf="center" display={openComments && loadingComments ? "block" : "none"}>
-						<CircularProgress size={24} />
-					</Grid>
-					<Grid item alignSelf="left" display={openComments && !loadingComments ? "block" : "none"}>
+					<Grid item alignSelf="left" display={openComments ? "block" : "none"}>
 						<Grid container spacing={2} flexDirection="column">
-							{!_.isEmpty(comments) && (
-								<Grid item>
-									<br />
-									<Divider />
-									<br />
+							<Grid item>
+								<br />
+								<Divider />
+								<br />
+							</Grid>
+							<Grid item xs>
+								<Grid container direction="row">
+									<Grid item xs={11}>
+										<StyledTextField
+											fullWidth
+											value={inputComment}
+											onChange={(e) => setInputComment(e.target.value)}
+											multiline
+											rows={1}
+											disabled={disableComment}
+											placeholder="Write a comment"
+											InputProps={{
+												sx: {
+													borderRadius: 4,
+													height: 36
+												}
+											}}
+										/>
+									</Grid>
+									<Grid item xs={1}>
+										<IconButton
+											sx={{ ml: 0.8 }}
+											onClick={() => {
+												if (!_.isEmpty(inputComment)) {
+													setloadingCommentCreate(true);
+													dispatch(
+														createIdeaComment({ id, academicYear, content: inputComment })
+													).then(() => {
+														setInputComment("");
+														getComments();
+														setloadingCommentCreate(false);
+													});
+												}
+											}}
+											size="small"
+											disabled={disableComment}
+										>
+											{!loadingCommentCreate ? (
+												<SendOutlined color="primary" />
+											) : (
+												<CircularProgress
+													sx={{
+														"& .MuiCircularProgress-svg": {
+															color: "rgb(80, 72, 229)"
+														}
+													}}
+													size={24}
+												/>
+											)}
+										</IconButton>
+									</Grid>
 								</Grid>
-							)}
+							</Grid>
+							<Grid item></Grid>
 							{comments.map((comment) => {
 								return (
 									<Grid
@@ -232,54 +331,8 @@ function IdeaInternal(props: IdeaProps) {
 							{!_.isEmpty(comments) && (
 								<Grid item>
 									<br />
-									<Divider />
-									<br />
 								</Grid>
 							)}
-							<Grid item xs>
-								<Stack direction="column">
-									<StyledTextField
-										onChange={(e) => setInputComment(e.target.value)}
-										multiline
-										rows={2}
-										disabled={disableComment}
-										placeholder="Write a comment"
-										sx={{
-											flexGrow: 1
-										}}
-										InputProps={{
-											sx: {
-												borderRadius: 2
-											}
-										}}
-									/>
-									<PrimaryButton
-										sx={{ width: 110, mt: 1, float: "right" }}
-										endIcon={!loadingCommentCreate ? <SendOutlined /> : undefined}
-										onClick={() => {
-											setloadingCommentCreate(true);
-											dispatch(
-												createIdeaComment({ id, academicYear, content: inputComment })
-											).then(() => {
-												getComments();
-												setloadingCommentCreate(false);
-											});
-										}}
-										size="small"
-										text={
-											!loadingCommentCreate ? (
-												"Post"
-											) : (
-												<CircularProgress
-													sx={{ "& .MuiCircularProgress-svg": { color: "white" } }}
-													size={24}
-												/>
-											)
-										}
-										disabled={disableComment}
-									/>
-								</Stack>
-							</Grid>
 						</Grid>
 					</Grid>
 				</Grid>

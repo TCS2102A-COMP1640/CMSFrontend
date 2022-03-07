@@ -1,6 +1,6 @@
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { APIPaths, fetchHandler } from "@app/utils";
-import { pushMessage, YearData } from "@app/redux";
+import { pushMessage, YearData, CategoryData } from "@app/redux";
 import {
 	IdeaResponseData,
 	IdeaCommentData,
@@ -95,7 +95,7 @@ export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
 		body.append("academicYear", _.toString((payload.academicYear as YearData).id));
 
 		if (!_.isUndefined(payload.categories)) {
-			body.append("categories", JSON.stringify(payload.categories));
+			body.append("categories", JSON.stringify((payload.categories as CategoryData[]).map((cat) => cat.id)));
 		}
 		if (!_.isUndefined(payload.documents)) {
 			(payload.documents as File[]).forEach((file) => {

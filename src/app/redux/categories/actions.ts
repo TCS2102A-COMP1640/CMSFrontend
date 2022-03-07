@@ -23,6 +23,22 @@ export const getCategories = createAsyncThunk<CategoryData[], PaginationPayload>
 	}
 );
 
+export const getCategoriesByName = createAsyncThunk<CategoryData[], Pick<CategoryData, "name">>(
+	"categories/getCategoriesByName",
+	async (payload, { rejectWithValue, getState }) => {
+		const {
+			auth: { token }
+		} = getState();
+		const { data, error } = <{ data: CategoryData[]; error?: Error }>(
+			await fetchHandler({ path: `${APIPaths.Categories}/:name`, method: "GET", params: payload, token })
+		);
+		if (_.isNil(error)) {
+			return data;
+		}
+		return rejectWithValue(error);
+	}
+);
+
 export const createCategory = createAsyncThunk<CategoryData, Omit<CategoryData, "id">>(
 	"categories/createCategory",
 	async (payload, { rejectWithValue, getState, dispatch }) => {

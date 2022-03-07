@@ -52,6 +52,58 @@ const Theme = createTheme({
 					borderTop: "1px solid rgba(224, 224, 224, 1)"
 				})
 			}
+		},
+		MuiButton: {
+			styleOverrides: {
+				root: ({ ownerState, theme }) => ({
+					...(ownerState.variant === "error" && {
+						backgroundColor: "rgb(245, 85, 64)",
+						color: "white",
+						"&:hover": {
+							backgroundColor: "rgb(252, 108, 88)"
+						}
+					}),
+					...(ownerState.variant === "primary" && {
+						backgroundColor: "rgb(80, 72, 229)",
+						color: "white",
+						"&:hover": {
+							backgroundColor: "rgb(56, 50, 160)"
+						}
+					}),
+					...(ownerState.variant === "action" && {
+						backgroundColor: "rgb(133, 139, 148)",
+						color: "white",
+						"&:hover": {
+							backgroundColor: "rgb(116, 120, 130)"
+						}
+					}),
+					...(ownerState.variant === "edit" && {
+						backgroundColor: "rgb(33, 43, 54)",
+						color: "white",
+						"&:hover": {
+							backgroundColor: "rgb(51, 62, 82)"
+						}
+					}),
+					...(ownerState.disabled && {
+						backgroundColor: "transparent"
+					})
+				})
+			}
+		},
+		MuiSvgIcon: {
+			styleOverrides: {
+				root: ({ ownerState, theme }) => ({
+					...(ownerState.color === "primary" && {
+						color: "rgb(80, 72, 229)"
+					}),
+					...(ownerState.color === "delete" && {
+						color: "rgb(245, 85, 64)"
+					}),
+					...(ownerState.color === "edit" && {
+						color: "rgb(33, 43, 54)"
+					})
+				})
+			}
 		}
 	}
 });

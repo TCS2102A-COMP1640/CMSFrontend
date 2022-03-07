@@ -1,10 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { CategoriesState } from "./interfaces";
-import { getCategories, createCategory, editCategory, deleteCategory, resetCategoriesState } from "./actions";
+import {
+	getCategories,
+	getCategoriesByName,
+	createCategory,
+	editCategory,
+	deleteCategory,
+	resetCategoriesState
+} from "./actions";
 import _ from "lodash";
 
 const categoriesState: CategoriesState = {
 	getCategories: {
+		data: [],
+		status: "idle"
+	},
+	getCategoriesByName: {
 		data: [],
 		status: "idle"
 	},
@@ -35,6 +46,17 @@ const categoriesSlice = createSlice({
 			.addCase(getCategories.fulfilled, (state, action) => {
 				state.getCategories.status = "idle";
 				state.getCategories.data = action.payload;
+			})
+			.addCase(getCategoriesByName.pending, (state, action) => {
+				state.getCategoriesByName.status = "pending";
+				state.getCategoriesByName.error = undefined;
+			})
+			.addCase(getCategoriesByName.rejected, (state, action) => {
+				state.getCategoriesByName.status = "idle";
+			})
+			.addCase(getCategoriesByName.fulfilled, (state, action) => {
+				state.getCategoriesByName.status = "idle";
+				state.getCategoriesByName.data = action.payload;
 			})
 			.addCase(createCategory.pending, (state, action) => {
 				state.createCategory.status = "pending";
