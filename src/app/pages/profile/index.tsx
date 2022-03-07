@@ -1,6 +1,17 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Box, Grid, Typography, Avatar, List, ListItem, ListItemText, ListItemAvatar, Paper } from "@mui/material";
+import {
+	Box,
+	Grid,
+	Typography,
+	Avatar,
+	List,
+	ListItem,
+	ListItemText,
+	ListItemAvatar,
+	Paper,
+	Skeleton
+} from "@mui/material";
 import { RootState, getProfile, RoleData, DepartmentData } from "@app/redux";
 import { EmailRounded, ApartmentRounded, GroupRounded } from "@mui/icons-material";
 import _ from "lodash";
@@ -55,7 +66,7 @@ export function ProfilePage() {
 							}}
 							children={`${name.split(" ")[0][0]}${name.split(" ")[1][0]}`}
 						/>
-						<Typography sx={{ fontSize: 25, pt: 2, pl: 1 }}>{name}</Typography>
+						<Typography sx={{ fontSize: 25, pt: 2, pl: 1 }}>{name ?? <Skeleton />}</Typography>
 					</Grid>
 					<Grid item xs={2.5} />
 					<Grid item>
@@ -73,13 +84,16 @@ export function ProfilePage() {
 								<ListItemAvatar>
 									<EmailRounded color="primary" />
 								</ListItemAvatar>
-								<ListItemText primary="Email" secondary={profile?.email} />
+								<ListItemText primary="Email" secondary={profile?.email ?? <Skeleton />} />
 							</ListItem>
 							<ListItem>
 								<ListItemAvatar>
 									<GroupRounded color="action" />
 								</ListItemAvatar>
-								<ListItemText primary="Role" secondary={(profile?.role as RoleData)?.name} />
+								<ListItemText
+									primary="Role"
+									secondary={(profile?.role as RoleData)?.name ?? <Skeleton />}
+								/>
 							</ListItem>
 							<ListItem>
 								<ListItemAvatar>

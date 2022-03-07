@@ -92,7 +92,7 @@ export function HomePage() {
 	const { token } = useSelector((state: RootState) => state.auth);
 	const [openDrawer, setOpenDrawer] = useState(false);
 	const [selectedCategory, setSelectedCategory] = useState(menuItems[0].header);
-	const [selectedItem, setSelectedItem] = useState(menuItems[0].items[1].name);
+	const [selectedItem, setSelectedItem] = useState(menuItems[0].items[0].name);
 	const mediaQueries = {
 		md: useMediaQuery((theme: Theme) => theme.breakpoints.up("md"))
 	};
