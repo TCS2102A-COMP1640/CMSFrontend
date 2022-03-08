@@ -167,7 +167,7 @@ export function StyledTableForm<T>(props: StyledTableFormProps<T>) {
 						}}
 					>
 						<TableContainer component={Paper} sx={{ boxShadow: "none" }}>
-							<StyledTable overlay={tableOverlay} sx={{ minWidth: { md: 300 } }} size="small">
+							<StyledTable overlay={tableOverlay} sx={{ minWidth: 700 }} size="small">
 								<TableHead>
 									<StyledTableRow>
 										{tableCellMappersNew.map((mapper) => {

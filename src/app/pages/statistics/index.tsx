@@ -53,8 +53,8 @@ export function StatisticsPage() {
 	return (
 		<Box>
 			<Grid container direction="row" spacing={2}>
-				<Grid item xs={10} />
-				<Grid item xs={2}>
+				<Grid item xs={9} />
+				<Grid item xs={3}>
 					<Autocomplete
 						value={year}
 						options={yearsData}
