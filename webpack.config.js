@@ -73,10 +73,20 @@ module.exports = {
 					chunks: "initial",
 					minChunks: 2
 				},
-				vendors: {
-					test: /[\\/]node_modules[\\/]/,
+				muiVendors: {
+					test: /[\\/]node_modules[\\/]@mui[\\/]/,
 					chunks: "all",
-					filename: isProduction ? "vendor.[contenthash].js" : "vendor.[hash].js"
+					filename: isProduction ? "muiVendors.[contenthash].js" : "muiVendors.[hash].js"
+				},
+				chartVendors: {
+					test: /[\\/]node_modules[\\/](react-chartjs-2|chart[.]js)[\\/]/,
+					chunks: "all",
+					filename: isProduction ? "chartVendors.[contenthash].js" : "chartVendors.[hash].js"
+				},
+				vendors: {
+					test: /[\\/]node_modules[\\/]((?!(@mui|react-chartjs-2|chart[.]js)).*)/,
+					chunks: "all",
+					filename: isProduction ? "vendors.[contenthash].js" : "vendors.[hash].js"
 				}
 			}
 		},

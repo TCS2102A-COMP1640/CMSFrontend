@@ -164,6 +164,7 @@ export function RolePage() {
 								options={permissionsData}
 								disableCloseOnSelect
 								getOptionLabel={(option) => option.name}
+								isOptionEqualToValue={(option, value) => option.id === value.id}
 								renderInput={(params) => <StyledTextField label="Permissions" {...params} />}
 								renderOption={(props, option, { selected }) => (
 									<li {...props}>

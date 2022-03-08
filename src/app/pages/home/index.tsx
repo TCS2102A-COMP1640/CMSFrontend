@@ -26,7 +26,8 @@ import {
 	CalendarTodayRounded,
 	ApartmentRounded,
 	PersonRounded,
-	GroupRounded
+	GroupRounded,
+    InsertChartRounded
 } from "@mui/icons-material";
 import {
 	logoutFromAccount,
@@ -52,6 +53,10 @@ const menuItems = [
 				name: "Profile",
 				icon: <AccountBoxRounded />
 			},
+            {
+                name: "Statistics",
+                icon: <InsertChartRounded/>
+            },
 			{
 				name: "Idea",
 				icon: <ArticleRounded />

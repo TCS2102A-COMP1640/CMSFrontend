@@ -7,7 +7,8 @@ import {
 	IdeaReactionData,
 	IdeaViewData,
 	IdeaData,
-	GetIdeasPayload
+	GetIdeasPayload,
+	IdeasStatisticsData
 } from "./interfaces";
 import { parseISO } from "date-fns";
 import _ from "lodash";
@@ -33,6 +34,25 @@ export const getIdeas = createAsyncThunk<IdeaResponseData, GetIdeasPayload>(
 					createTimestamp: parseISO(idea.createTimestamp as string)
 				};
 			});
+			return data;
+		}
+		return rejectWithValue(error);
+	}
+);
+
+export const getIdeasStatistics = createAsyncThunk<IdeasStatisticsData, Pick<GetIdeasPayload, "academicYear">>(
+	"ideas/getIdeasStatistics",
+	async (payload, { rejectWithValue, getState }) => {
+		const {
+			auth: { token }
+		} = getState();
+		const { data, error } = <{ data: IdeasStatisticsData; error?: Error }>await fetchHandler({
+			path: `${APIPaths.Ideas}/statistics`,
+			method: "GET",
+			query: payload,
+			token
+		});
+		if (_.isNil(error)) {
 			return data;
 		}
 		return rejectWithValue(error);
@@ -93,6 +113,7 @@ export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
 		const body = new FormData();
 		body.append("content", payload.content as string);
 		body.append("academicYear", _.toString((payload.academicYear as YearData).id));
+		body.append("isAnonymous", _.toString(payload.isAnonymous ?? false));
 
 		if (!_.isUndefined(payload.categories)) {
 			body.append("categories", JSON.stringify((payload.categories as CategoryData[]).map((cat) => cat.id)));
@@ -121,7 +142,7 @@ export const createIdea = createAsyncThunk<IdeaData, Partial<IdeaData>>(
 
 export const createIdeaComment = createAsyncThunk<
 	IdeaCommentData,
-	Pick<IdeaCommentData, "id" | "content"> & { academicYear: number }
+	Pick<IdeaCommentData, "id" | "content" | "isAnonymous"> & { academicYear: number }
 >("ideas/createIdeaComment", async (payload, { rejectWithValue, getState, dispatch }) => {
 	const {
 		auth: { token }

@@ -29,7 +29,9 @@ import {
 	LocalOfferOutlined,
 	AttachmentRounded,
 	FilterListRounded,
-	DownloadRounded
+	DownloadRounded,
+	VisibilityOutlined,
+	VisibilityOffOutlined
 } from "@mui/icons-material";
 import {
 	RootState,
@@ -397,6 +399,19 @@ export function IdeaPage() {
 								hidden
 							/>
 						</IconButton>
+						<Checkbox
+							disabled={disablePostingIdea}
+							checked={form.isAnonymous}
+							icon={<VisibilityOutlined />}
+							checkedIcon={<VisibilityOffOutlined />}
+							onChange={(e, checked) => setForm({ ...form, isAnonymous: checked })}
+							sx={{
+								ml: 1,
+								"&.Mui-checked": {
+									color: "rgb(80, 72, 229) !important"
+								}
+							}}
+						/>
 						<FormControlLabel
 							disabled={disablePostingIdea}
 							sx={{
@@ -413,7 +428,7 @@ export function IdeaPage() {
 							onClick={() => {
 								if (validate()) {
 									dispatch(createIdea(form)).then(() => {
-										setForm({ content: "", academicYear: form.academicYear });
+										setForm({ isAnonymous: false, content: "", academicYear: form.academicYear });
 										getIdeasPaginated();
 									});
 								}

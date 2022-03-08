@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router";
 import { BrowserRouter } from "react-router-dom";
 import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider, createTheme } from "@mui/material";
+import { Chart as ChartJS, CategoryScale, BarElement, ArcElement, Tooltip, Legend, LinearScale, RadialLinearScale } from "chart.js";
 import { LocalizationProvider } from "@mui/lab";
 import { SnackbarProvider } from "notistack";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
@@ -15,6 +16,7 @@ import {
 	CategoryPage,
 	YearPage,
 	DepartmentPage,
+	StatisticsPage,
 	UserPage,
 	RolePage
 } from "@app/pages";
@@ -22,6 +24,8 @@ import { Store, StorePersistor, RootState, popMessage } from "@app/redux";
 import { AuthRequired } from "@app/components";
 import { useSnackbar } from "notistack";
 import _ from "lodash";
+
+ChartJS.register(LinearScale, RadialLinearScale, CategoryScale, BarElement, ArcElement, Tooltip, Legend);
 
 const Theme = createTheme({
 	typography: {
@@ -149,6 +153,7 @@ export function App() {
 									<Route path="/" element={<AuthRequired />}>
 										<Route path="/" element={<HomePage />}>
 											<Route path="/profile" element={<ProfilePage />} />
+											<Route path="/statistics" element={<StatisticsPage />} />
 											<Route path="/idea" element={<IdeaPage />} />
 											<Route path="/category" element={<CategoryPage />} />
 											<Route path="/year" element={<YearPage />} />

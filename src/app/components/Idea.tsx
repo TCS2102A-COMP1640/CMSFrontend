@@ -13,6 +13,7 @@ import {
 	useMediaQuery,
 	Tooltip,
 	Divider,
+	Checkbox,
 	Box,
 	Badge
 } from "@mui/material";
@@ -24,6 +25,8 @@ import {
 	SendOutlined,
 	AccessTimeFilled,
 	VisibilityRounded,
+	VisibilityOutlined,
+	VisibilityOffOutlined,
 	ReviewsRounded
 } from "@mui/icons-material";
 import {
@@ -54,13 +57,14 @@ function IdeaInternal(props: IdeaProps) {
 	const {
 		idea: {
 			id,
-			user: { department },
+			user: { firstName, lastName, department },
 			content,
 			categories,
 			documents,
 			createTimestamp,
 			viewCount,
 			thumbUpCount,
+			isAnonymous,
 			thumbDownCount
 		},
 		academicYear,
@@ -72,6 +76,7 @@ function IdeaInternal(props: IdeaProps) {
 
 	const isInitialMount = useRef(true);
 	const [inputComment, setInputComment] = useState("");
+	const [anonymous, setAnonymous] = useState(false);
 	const [openComments, setOpenComments] = useState(false);
 	const [loadingComments, setLoadingComments] = useState(false);
 	const [loadingCommentCreate, setloadingCommentCreate] = useState(false);
@@ -124,7 +129,7 @@ function IdeaInternal(props: IdeaProps) {
 				expandIcon={<ExpandMore />}
 			>
 				<Typography display="block" fontSize={18} variant={mediaQueries.sm ? "h5" : "h6"}>
-					{department?.name ?? "Unassigned"}
+					{isAnonymous ? department?.name ?? "Unassigned" : `${firstName} ${lastName}`}
 				</Typography>
 				<Typography color="gray" variant="caption">
 					<Tooltip title={format(createTimestamp as Date, "dd/MM/yyyy hh:mm:ss")}>
@@ -245,7 +250,7 @@ function IdeaInternal(props: IdeaProps) {
 							</Grid>
 							<Grid item xs>
 								<Grid container direction="row">
-									<Grid item xs={11}>
+									<Grid item xs={10.5}>
 										<StyledTextField
 											fullWidth
 											value={inputComment}
@@ -262,14 +267,20 @@ function IdeaInternal(props: IdeaProps) {
 											}}
 										/>
 									</Grid>
-									<Grid item xs={1}>
+
+									<Grid item xs={0.5}>
 										<IconButton
 											sx={{ ml: 0.8 }}
 											onClick={() => {
 												if (!_.isEmpty(inputComment)) {
 													setloadingCommentCreate(true);
 													dispatch(
-														createIdeaComment({ id, academicYear, content: inputComment })
+														createIdeaComment({
+															id,
+															academicYear,
+															isAnonymous: anonymous,
+															content: inputComment
+														})
 													).then(() => {
 														setInputComment("");
 														getComments();
@@ -294,6 +305,23 @@ function IdeaInternal(props: IdeaProps) {
 											)}
 										</IconButton>
 									</Grid>
+									<Grid item xs={0.1}>
+										<Checkbox
+											disabled={disableComment}
+											checked={anonymous}
+											icon={<VisibilityOutlined />}
+											checkedIcon={<VisibilityOffOutlined />}
+											onChange={(e, checked) => setAnonymous(checked)}
+											sx={{
+                                                height: 34,
+                                                width: 34,
+												ml: 0.5,
+												"&.Mui-checked": {
+													color: "rgb(80, 72, 229) !important"
+												}
+											}}
+										/>
+									</Grid>
 								</Grid>
 							</Grid>
 							<Grid item></Grid>
@@ -313,7 +341,9 @@ function IdeaInternal(props: IdeaProps) {
 									>
 										<Box display="flex">
 											<Typography textAlign="left" variant="subtitle2" fontWeight={600}>
-												{comment.user.department?.name ?? "Unassigned"}
+												{comment.isAnonymous
+													? comment.user.department?.name ?? "Unassigned"
+													: `${comment.user.firstName} ${comment.user.lastName}`}
 											</Typography>
 											<Box flexGrow={1} />
 											<Typography color="gray" variant="caption">

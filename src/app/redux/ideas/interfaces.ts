@@ -8,6 +8,13 @@ export interface GetIdeasPayload {
 	order?: "views" | "reactions" | "latest";
 }
 
+export interface IdeaUserData {
+	id: number;
+	firstName?: string;
+	lastName?: string;
+	department?: DepartmentData;
+}
+
 export interface IdeaDocumentData {
 	id: number;
 	name: string;
@@ -18,10 +25,8 @@ export interface IdeaCommentData {
 	id: number;
 	content: string;
 	createTimestamp: string | Date;
-	user: {
-		id: number;
-		department?: DepartmentData;
-	};
+	user: IdeaUserData;
+	isAnonymous: boolean;
 }
 
 export interface IdeaReactionData {
@@ -36,10 +41,7 @@ export interface IdeaViewData {
 export interface IdeaData {
 	id: number;
 	content: string;
-	user: {
-		id: number;
-		department?: DepartmentData;
-	};
+	user: IdeaUserData;
 	categories: number[] | CategoryData[];
 	viewCount: number;
 	reactionScore: number;
@@ -48,11 +50,23 @@ export interface IdeaData {
 	documents: File[] | IdeaDocumentData[];
 	academicYear?: number | YearData;
 	createTimestamp: string | Date;
+	isAnonymous: boolean;
 }
 
 export interface IdeaResponseData {
 	pages: number;
 	data: IdeaData[];
+}
+
+export interface IdeasStatisticsData {
+	[index: string]: {
+		total: number;
+		percentage: number;
+		contributors: number;
+		anonymousIdeas: number;
+		anonymousComments: number;
+		ideasWithoutComment: number;
+	};
 }
 
 export interface IdeasState {
