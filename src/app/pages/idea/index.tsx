@@ -194,8 +194,8 @@ export function IdeaPage() {
 				</DialogContent>
 			</Dialog>
 			<Grid item width="100%" alignSelf="center">
-				<Grid container spacing={2}>
-					<Grid item sx={{ alignSelf: "center" }}>
+				<Grid container direction={{ xs: "column", sm: "row" }} spacing={2}>
+					<Grid item sx={{ alignSelf: { sm: "center", xs: "unset" } }}>
 						<IconButton
 							disabled={_.isUndefined(form.academicYear)}
 							onClick={(e) => {
@@ -219,12 +219,13 @@ export function IdeaPage() {
 							))}
 						</Menu>
 					</Grid>
-					<Grid item sx={{ alignSelf: "center" }} xs={0.9}>
+					<Grid item sx={{ alignSelf: { sm: "center", xs: "unset" } }} xs={0.9}>
 						<IconButton
 							disabled={_.isUndefined(form.academicYear)}
 							href={`${APIPaths.Ideas}/csv?academicYear=${
 								(form.academicYear as YearData)?.id
 							}&token=${token}`}
+							target="_blank"
 							download
 						>
 							<Badge
@@ -248,12 +249,13 @@ export function IdeaPage() {
 							</Badge>
 						</IconButton>
 					</Grid>
-					<Grid item sx={{ alignSelf: "center" }}>
+					<Grid item sx={{ alignSelf: { sm: "center", xs: "unset" } }}>
 						<IconButton
 							disabled={_.isUndefined(form.academicYear)}
 							href={`${APIPaths.Ideas}/documents?academicYear=${
 								(form.academicYear as YearData)?.id
 							}&token=${token}`}
+							target="_blank"
 							download
 						>
 							<Badge
@@ -384,6 +386,19 @@ export function IdeaPage() {
 								))}
 						</Stack>
 					</CardContent>
+					<CardActions sx={{ display: { xs: "block", sm: "none" } }}>
+						<FormControlLabel
+							disabled={disablePostingIdea}
+							sx={{
+								"& .Mui-checked": {
+									color: "rgb(80, 72, 229) !important"
+								},
+								m: 0
+							}}
+							control={<Checkbox checked={checked} onChange={(e, checked) => setChecked(checked)} />}
+							label="I agree to Terms and Conditions"
+						/>
+					</CardActions>
 					<CardActions sx={{ pr: 2 }}>
 						<IconButton onClick={() => setOpenDialog(true)} disabled={disablePostingIdea} sx={{ ml: 0.1 }}>
 							<LocalOfferOutlined />
@@ -417,6 +432,10 @@ export function IdeaPage() {
 							sx={{
 								"& .Mui-checked": {
 									color: "rgb(80, 72, 229) !important"
+								},
+								display: {
+									sm: "block",
+									xs: "none"
 								}
 							}}
 							control={<Checkbox checked={checked} onChange={(e, checked) => setChecked(checked)} />}
@@ -432,6 +451,9 @@ export function IdeaPage() {
 										getIdeasPaginated();
 									});
 								}
+							}}
+							sx={{
+								minWidth: 90
 							}}
 							disabled={disablePostingIdea}
 							variant="primary"

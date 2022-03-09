@@ -47,12 +47,13 @@ export function ProfilePage() {
 								display: "inline-flex",
 								bgcolor: stringToColor(name)
 							}}
-							children={`${name.split(" ")[0][0]}${name.split(" ")[1][0]}`}
+							children={!profile?.id ? undefined : `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`}
 						/>
-						<Typography sx={{ fontSize: 25, pt: 2, pl: 1 }}>{name ?? <Skeleton />}</Typography>
+						<Typography sx={{ fontSize: 25, pt: 2, pl: 1 }}>
+							{!profile?.id ? <Skeleton /> : name}
+						</Typography>
 					</Grid>
-					<Grid item xs={2.5} />
-					<Grid item>
+					<Grid item xs={12}>
 						<List
 							sx={{
 								"& .MuiListItem-root": {
@@ -84,7 +85,10 @@ export function ProfilePage() {
 								</ListItemAvatar>
 								<ListItemText
 									primary="Department"
-									secondary={(profile?.department as DepartmentData)?.name ?? "Unassigned"}
+									secondary={
+										(profile?.department as DepartmentData)?.name ??
+										(!profile?.id ? <Skeleton /> : "Unassigned")
+									}
 								/>
 							</ListItem>
 						</List>

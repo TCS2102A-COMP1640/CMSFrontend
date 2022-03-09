@@ -4,7 +4,16 @@ import { Routes, Route } from "react-router";
 import { BrowserRouter } from "react-router-dom";
 import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider, createTheme } from "@mui/material";
-import { Chart as ChartJS, CategoryScale, BarElement, ArcElement, Tooltip, Legend, LinearScale, RadialLinearScale } from "chart.js";
+import {
+	Chart as ChartJS,
+	CategoryScale,
+	BarElement,
+	ArcElement,
+	Tooltip,
+	Legend,
+	LinearScale,
+	RadialLinearScale
+} from "chart.js";
 import { LocalizationProvider } from "@mui/lab";
 import { SnackbarProvider } from "notistack";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
@@ -94,6 +103,17 @@ const Theme = createTheme({
 				})
 			}
 		},
+		// MuiIconButton: {
+		// 	styleOverrides: {
+		// 		root: ({ ownerState, theme }) => ({
+		// 			...(ownerState.disabled && {
+		// 				"&.Mui-disabled": {
+		// 					color: "rgba(0, 0, 0, 0.26) !important"
+		// 				}
+		// 			})
+		// 		})
+		// 	}
+		// },
 		MuiSvgIcon: {
 			styleOverrides: {
 				root: ({ ownerState, theme }) => ({

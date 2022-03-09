@@ -104,6 +104,12 @@ function IdeaInternal(props: IdeaProps) {
 	};
 
 	useEffect(() => {
+		getReaction();
+		setComments([]);
+		setOpenComments(false);
+	}, [props.idea]);
+
+	useEffect(() => {
 		if (isInitialMount.current) {
 			isInitialMount.current = false;
 			getReaction();
@@ -192,7 +198,7 @@ function IdeaInternal(props: IdeaProps) {
 								}}
 								disabled={disableComment}
 							>
-								<ThumbUp color={reaction === 1 ? "primary" : "action"} />
+								<ThumbUp color={reaction === 1 ? "primary" : !disableComment ? "action" : "disabled"} />
 							</IconButton>
 							<IconButton
 								onClick={() => {
@@ -200,7 +206,9 @@ function IdeaInternal(props: IdeaProps) {
 								}}
 								disabled={disableComment}
 							>
-								<ThumbDown color={reaction === 2 ? "primary" : "action"} />
+								<ThumbDown
+									color={reaction === 2 ? "primary" : !disableComment ? "action" : "disabled"}
+								/>
 							</IconButton>
 							<IconButton
 								onClick={() => {
@@ -250,7 +258,7 @@ function IdeaInternal(props: IdeaProps) {
 							</Grid>
 							<Grid item xs>
 								<Grid container direction="row">
-									<Grid item xs={10.5}>
+									<Grid item xs={10}>
 										<StyledTextField
 											fullWidth
 											value={inputComment}
@@ -268,59 +276,57 @@ function IdeaInternal(props: IdeaProps) {
 										/>
 									</Grid>
 
-									<Grid item xs={0.5}>
-										<IconButton
-											sx={{ ml: 0.8 }}
-											onClick={() => {
-												if (!_.isEmpty(inputComment)) {
-													setloadingCommentCreate(true);
-													dispatch(
-														createIdeaComment({
-															id,
-															academicYear,
-															isAnonymous: anonymous,
-															content: inputComment
-														})
-													).then(() => {
-														setInputComment("");
-														getComments();
-														setloadingCommentCreate(false);
-													});
-												}
-											}}
-											size="small"
-											disabled={disableComment}
-										>
-											{!loadingCommentCreate ? (
-												<SendOutlined color="primary" />
-											) : (
-												<CircularProgress
-													sx={{
-														"& .MuiCircularProgress-svg": {
-															color: "rgb(80, 72, 229)"
-														}
-													}}
-													size={24}
-												/>
-											)}
-										</IconButton>
-									</Grid>
-									<Grid item xs={0.1}>
-										<Checkbox
-											disabled={disableComment}
-											checked={anonymous}
-											icon={<VisibilityOutlined />}
-											checkedIcon={<VisibilityOffOutlined />}
-											onChange={(e, checked) => setAnonymous(checked)}
-											sx={{
-                                                height: 34,
-                                                width: 34,
-												ml: 0.5,
-												"&.Mui-checked": {
-													color: "rgb(80, 72, 229) !important"
-												}
-											}}
-										/>
+									<Grid item xs={2}>
+										<Stack direction="row">
+											<IconButton
+												onClick={() => {
+													if (!_.isEmpty(inputComment)) {
+														setloadingCommentCreate(true);
+														dispatch(
+															createIdeaComment({
+																id,
+																academicYear,
+																isAnonymous: anonymous,
+																content: inputComment
+															})
+														).then(() => {
+															setInputComment("");
+															getComments();
+															setloadingCommentCreate(false);
+														});
+													}
+												}}
+												size="small"
+												disabled={disableComment}
+											>
+												{!loadingCommentCreate ? (
+													<SendOutlined color={!disableComment ? "primary" : "disabled"} />
+												) : (
+													<CircularProgress
+														sx={{
+															"& .MuiCircularProgress-svg": {
+																color: "rgb(80, 72, 229)"
+															}
+														}}
+														size={24}
+													/>
+												)}
+											</IconButton>
+											<Checkbox
+												disabled={disableComment}
+												checked={anonymous}
+												icon={<VisibilityOutlined />}
+												checkedIcon={<VisibilityOffOutlined />}
+												onChange={(e, checked) => setAnonymous(checked)}
+												sx={{
+													height: 34,
+													width: 34,
+													"&.Mui-checked": {
+														color: "rgb(80, 72, 229) !important"
+													}
+												}}
+											/>
+										</Stack>
 									</Grid>
 								</Grid>
 							</Grid>
